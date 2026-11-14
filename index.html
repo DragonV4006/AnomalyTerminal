@@ -1,0 +1,1660 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Retro Terminal OS</title>
+<style>
+:root{--bg:#020603;--panel:#071008;--green:#8cff9c;--dim:#4e8c59;--line:#1c4b27;--bright:#c5ffd0;--amber:#d5c477}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:"Cascadia Mono","Consolas","Courier New",monospace}
+
+/* --- АНИМАЦИИ МОНИТОРА --- */
+#screen-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 10000; }
+#crt-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; opacity: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+#crt-line { width: 100%; height: 2px; background: #fff; opacity: 0; box-shadow: 0 0 15px #fff; }
+
+@keyframes turnOn {
+  0% { transform: scaleY(0.01) scaleX(0.5); opacity: 1; filter: brightness(3); }
+  30% { transform: scaleY(0.01) scaleX(1); opacity: 1; filter: brightness(3); }
+  100% { transform: scaleY(1) scaleX(1); opacity: 0; filter: brightness(1); }
+}
+@keyframes turnOff {
+  0% { transform: scaleY(1) scaleX(1); opacity: 1; filter: brightness(1); }
+  60% { transform: scaleY(0.01) scaleX(1); opacity: 1; filter: brightness(3); }
+  100% { transform: scaleY(0.01) scaleX(0.001); opacity: 0; filter: brightness(5); }
+}
+
+/* --- ЭКРАН ВКЛЮЧЕНИЯ + BOOT SEQUENCE --- */
+#start-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s; }
+.power-btn { background: transparent; color: var(--green); border: 2px solid var(--green); padding: 15px 40px; font-size: 20px; font-family: inherit; cursor: pointer; letter-spacing: 2px; text-shadow: 0 0 5px var(--green); box-shadow: inset 0 0 10px rgba(140,255,156,0.1), 0 0 10px rgba(140,255,156,0.1); transition: all 0.2s; }
+.power-btn:hover { background: var(--green); color: #000; box-shadow: 0 0 20px var(--green); }
+.power-btn:active { transform: scale(0.95); }
+
+#boot-sequence { display: none; color: var(--green); font-size: 14px; line-height: 1.8; text-align: left; width: 400px; }
+#boot-sequence .boot-line { opacity: 0; animation: fadeInLine 0.3s forwards; }
+@keyframes fadeInLine { to { opacity: 1; } }
+#boot-sequence .ok { color: var(--bright); }
+
+/* --- ОСНОВНОЙ ИНТЕРФЕЙС (ОС) --- */
+.app{
+  height:100%;
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:0;
+  padding:22px;
+  background: 
+    radial-gradient(circle at 15% 20%, rgba(20, 100, 40, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(10, 80, 30, 0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 48% 42%, #0b1d0e 0, #020603 62%, #000 100%);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.5s;
+  position: relative;
+}
+.app.on { opacity: 1; pointer-events: auto; }
+
+/* CRT-эффект с сеткой и сканлайнами */
+body:before {
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background: 
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 1px, transparent 1px, transparent 4px),
+    repeating-linear-gradient(to right, rgba(140,255,156,0.015) 0, rgba(140,255,156,0.015) 1px, transparent 1px, transparent 60px);
+  mix-blend-mode:screen;
+  z-index:5;
+  opacity:.35;
+}
+body:after {
+  content:"";
+  position:fixed;
+  inset:-20%;
+  pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.68) 100%);
+  z-index:6;
+}
+
+/* Плавающие частицы */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(140, 255, 156, 0.4);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(140, 255, 156, 0.6);
+  animation: float linear infinite;
+}
+@keyframes float {
+  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) translateX(30px); opacity: 0; }
+}
+
+.sidebar,.terminal{border:1px solid var(--line);background:rgba(3,10,5,.85);box-shadow:0 0 24px rgba(45,255,75,.07),inset 0 0 22px rgba(45,255,75,.035); backdrop-filter: blur(2px);}
+.sidebar{border-right:0;padding:18px 14px;display:flex;flex-direction:column;min-height:0;position:relative;z-index:7}
+.terminal{min-width:0;display:flex;flex-direction:column;position:relative;z-index:7; overflow:hidden;}
+
+.brand{font-size:15px;color:var(--bright);letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 8px rgba(140,255,156,.65)}
+.status{color:var(--dim);font-size:11px;padding-bottom:17px;border-bottom:1px dashed var(--line);line-height:1.55}
+
+.path-nav { display: flex; flex-direction: column; gap: 5px; margin-top: 15px; font-size: 12px; }
+.path-btn { background: transparent; border: 1px solid var(--line); color: var(--green); text-align: left; padding: 6px 8px; cursor: pointer; font-family: inherit;}
+.path-btn:hover { border-color: var(--green); background: rgba(140,255,156,0.1); }
+
+.sidebar-bottom{margin-top:auto;padding-top:15px;border-top:1px dashed var(--line);font-size:10px;color:var(--dim);line-height:1.7}
+.power-off-btn { display: block; width: 100%; margin-top: 10px; background: transparent; border: 1px solid #ff5555; color: #ff5555; padding: 8px; font-family: inherit; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
+.power-off-btn:hover { background: #ff5555; color: #000; box-shadow: 0 0 10px #ff5555; }
+
+/* --- РАБОЧИЙ СТОЛ --- */
+.topbar{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:var(--dim);font-size:11px;flex:0 0 auto; gap: 10px; background: rgba(3,10,5,0.5);}
+.dots{display:flex;gap:6px}.dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--dim)}.dot:nth-child(2){border-color:var(--amber)}.dot:nth-child(3){border-color:var(--green)}
+#path{color:var(--green);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+
+.desktop { 
+  position: relative; 
+  overflow: hidden; 
+  flex: 1; 
+  width: 100%; 
+  height: 100%; 
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(20, 90, 40, 0.15) 0%, transparent 70%),
+    linear-gradient(135deg, rgba(5, 20, 10, 0.6) 0%, rgba(0, 0, 0, 0.9) 100%);
+}
+.desktop::-webkit-scrollbar{width:7px}.desktop::-webkit-scrollbar-thumb{background:#205a2a}
+
+.desktop-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; padding: 10px; border: 1px solid transparent; user-select: none; position: absolute; width: 100px; text-align: center; border-radius: 4px;}
+.desktop-icon:active { cursor: grabbing; }
+.desktop-icon:hover { background: rgba(140,255,156,0.1); border-color: var(--line); box-shadow: 0 0 15px rgba(140,255,156,0.15); }
+.desktop-icon .icon-img { font-size: 40px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(140,255,156,0.3); }
+.desktop-icon .icon-label { font-size: 12px; color: var(--bright); word-break: break-word; }
+
+/* --- РЕДАКТОР / ИИ-ИНТЕРФЕЙС --- */
+.editor-view { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; background: rgba(3,10,5,0.98); z-index: 10;}
+.editor-view.active { display: flex; }
+.content{padding:25px 34px 30px;overflow-y:scroll;scroll-behavior:smooth;flex:1;min-height:0;height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{width:7px}.content::-webkit-scrollbar-thumb{background:#205a2a}
+
+.system-prompt {color: var(--amber); font-size: 14px; margin-bottom: 22px; user-select:none;}
+.system-prompt span {color: var(--green);}
+h1{font-size:clamp(23px,4vw,42px);font-weight:400;letter-spacing:2px;color:var(--bright);margin:0 0 20px;text-shadow:0 0 12px rgba(140,255,156,.45)}
+h2{font-size:15px;color:var(--amber);font-weight:400;margin:28px 0 10px}
+p,li{max-width:780px;color:#8fc699;font-size:14px;line-height:1.85}ul{padding-left:22px}.meta{font-size:11px;color:var(--dim);margin-bottom:25px}.rule{height:1px;background:linear-gradient(90deg,var(--line),transparent);margin:22px 0}
+pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--line);padding:12px 15px;background:rgba(20,65,27,.12);overflow:auto;max-width:850px}
+.content{--text-size:14px;color:var(--text-color)}.content p,.content li{font-size:var(--text-size)}.content pre{font-size:calc(var(--text-size) - 1px)}.content h1{font-size:clamp(23px,calc(var(--text-size) * 2.8),42px)}.content h2{font-size:calc(var(--text-size) + 1px)}
+
+.footer{border-top:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;color:var(--dim);font-size:11px;flex:0 0 auto; background: var(--panel);} 
+.nav button,.add{font:inherit;color:var(--green);background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}.nav button:hover,.add:hover{border-color:var(--green);color:var(--bright);box-shadow:0 0 8px rgba(140,255,156,.2)}
+.controls{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:16px}.controls button{font:inherit;font-size:11px;color:var(--green);background:transparent;border:1px solid var(--line);padding:3px 6px;cursor:pointer}.controls button:hover{border-color:var(--green);color:var(--bright)}.size-label{min-width:38px;text-align:center;color:var(--dim);font-size:10px}.color-picker{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:10px;margin-left:5px}.color-picker input{width:25px;height:20px;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--green);vertical-align:-2px;animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+@media(max-width:800px){.app{grid-template-columns:1fr;padding:8px}.sidebar{display:none}.content{padding:22px 18px}.footer{font-size:10px}}
+
+/* Стили для блока ответа ИИ */
+#aiResponse { color: var(--green) !important; }
+#aiResponse b { color: var(--bright); }
+</style>
+</head>
+<body>
+
+<!-- Частицы на фоне -->
+<div class="particles" id="particles"></div>
+
+<!-- Экран включения -->
+<div id="start-screen">
+  <div id="power-ui">
+    <div style="color:var(--dim); font-size:12px; margin-bottom:20px; letter-spacing:2px; text-align:center;">ARCHIVE TERMINAL OS v1.0</div>
+    <button class="power-btn" id="powerOnBtn">ВКЛЮЧИТЬ ТЕРМИНАЛ</button>
+  </div>
+  <div id="boot-sequence"></div>
+</div>
+
+<div id="screen-flash"></div>
+<div id="crt-overlay"><div id="crt-line"></div></div>
+
+<!-- Основное приложение -->
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="brand">/ / ARCHIVE_OS</div>
+    <div class="status">LOCAL SESSION<br>STATUS: <span style="color:var(--green)">ONLINE</span></div>
+    <div class="path-nav" id="pathNav"></div>
+    <div class="sidebar-bottom">
+      <button class="add" id="addItemBtn" style="width:100%; margin-bottom:10px;">+ СОЗДАТЬ</button>
+      <button class="power-off-btn" id="powerOffBtn">ВЫКЛЮЧИТЬ ТЕРМИНАЛ</button>
+    </div>
+  </aside>
+  
+  <main class="terminal">
+    <!-- Рабочий стол -->
+    <div id="desktopView" style="display:flex; flex-direction:column; height:100%; width:100%;">
+      <div class="topbar">
+        <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        <div id="path">/home/desktop</div>
+        <div>TTY: 01</div>
+      </div>
+      <div class="desktop" id="desktopGrid"></div>
+    </div>
+
+    <!-- Редактор / Anomaly.ai -->
+    <div id="editorView" class="editor-view">
+      <div class="topbar">
+        <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        <div id="editorPath">/home/desktop/file.txt</div>
+        <div class="controls" id="editorControls">
+          <button id="closeEditorBtn" style="color:#ff5555; border-color:#ff5555; margin-right:10px;">[ ЗАКРЫТЬ ]</button>
+          <button id="addH1" type="button" title="Добавить заголовок">+ H1</button>
+          <button id="addH2" type="button" title="Добавить подзаголовок">+ H2</button>
+          <button id="delH1" type="button" title="Удалить заголовок">− H1</button>
+          <button id="delH2" type="button" title="Удалить подзаголовок">− H2</button>
+          <span style="margin:0 5px;color:var(--line)">|</span>
+          <button id="fontDown" type="button" title="Уменьшить шрифт">A−</button>
+          <span class="size-label" id="fontSizeLabel">14px</span>
+          <button id="fontUp" type="button" title="Увеличить шрифт">A+</button>
+          <label class="color-picker" title="Цвет текста"><span>COLOR</span><input id="textColor" type="color" value="#8fc699"></label>
+        </div>
+        <div id="editorModeLabel">EDITOR</div>
+      </div>
+      
+      <article class="content" id="content" tabindex="0" contenteditable="true" spellcheck="false"></article>
+      
+      <div class="footer">
+        <span id="counter">FILE: </span>
+        <div class="nav" id="footerNav">
+          <button id="saveBtn" type="button">[ СОХРАНИТЬ ]</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// --- ГЕНЕРАЦИЯ ЧАСТИЦ ---
+(function generateParticles() {
+  var container = document.getElementById('particles');
+  if (!container) return;
+  var count = 40;
+  for (var i = 0; i < count; i++) {
+    var p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (10 + Math.random() * 20) + 's';
+    p.style.animationDelay = (Math.random() * 20) + 's';
+    p.style.opacity = 0.2 + Math.random() * 0.6;
+    var size = 1 + Math.random() * 2;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    container.appendChild(p);
+  }
+})();
+
+// --- СТРУКТУРА ДАННЫХ ---
+var defaultData = {
+  name: "root",
+  isFolder: true,
+  children: [
+    {
+      name: "Documents",
+      isFolder: true,
+      children: [
+        { name: "welcome.txt", isFolder: false, body: '<h1>WELCOME TO ARCHIVE_OS<span class="cursor"></span></h1><div class="meta">SYSTEM DOCUMENT</div><div class="rule"></div><p>Это твой личный терминал. Теперь это полноценная операционная система в стиле ретро.</p><p>Двойной клик по папке заходит внутрь. Двойной клик по файлу открывает его для редактирования.</p><h2>УПРАВЛЕНИЕ</h2><pre>Двойной клик — Открыть / Войти\nКнопка + СОЗДАТЬ — Создать папку или файл\nКнопка ЗАКРЫТЬ — Вернуться на рабочий стол\nПравый клик — Удалить (в корзину)</pre><p style="color:var(--dim)">SYSTEM READY_</p>' },
+        { name: "about.txt", isFolder: false, body: '<h1>ABOUT</h1><div class="rule"></div><p>Это автономный файл. Работает локально без интернета.</p>' }
+      ]
+    },
+    {
+      name: "anomaly.ai",
+      isFolder: false,
+      isAI: true,
+      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // BETA</div><div class="rule"></div><p>Привет. Я Anomaly.ai. Я умею считать, искать в Википедии, Fandom, читать твои файлы и поддерживать живой диалог.</p><p>Напиши что-нибудь в строке ниже и нажми Enter. Например: <b>2+2</b>, <b>что такое вода</b>, <b>перескажи welcome.txt</b> или просто <b>привет</b>.</p><div style="margin-top:20px; display:flex; gap:10px;"><input type="text" id="aiInput" placeholder="Напиши мне что-нибудь..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;" onkeydown="if(event.key===\'Enter\') askAnomaly()"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button></div><div id="aiResponse" style="margin-top:20px; padding:15px; border-left:2px solid var(--amber); background:rgba(213,196,119,0.05); display:none;"></div>' },
+    {
+      name: "Projects",
+      isFolder: true,
+      children: [
+         { name: "ideas.txt", isFolder: false, body: '<h1>IDEAS</h1><div class="rule"></div><p>Здесь можно хранить планы на будущее.</p>' }
+      ]
+    },
+    {
+      name: "_TRASH",
+      isFolder: true,
+      isTrash: true,
+      children: []
+    }
+  ]
+};
+
+var treeData = null;
+var activeFile = null;
+var currentPath = [];
+var STORAGE_KEY='retroTerminalTree';
+
+function loadData() {
+  var saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { treeData = JSON.parse(saved); } catch(e) { treeData = JSON.parse(JSON.stringify(defaultData)); }
+  } else {
+    treeData = JSON.parse(JSON.stringify(defaultData));
+  }
+  
+  var hasAI = treeData.children.some(function(c) { return c.isAI; });
+  if (!hasAI) {
+    treeData.children.push({
+      name: "anomaly.ai",
+      isFolder: false,
+      isAI: true,
+      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // BETA</div><div class="rule"></div><p>Привет. Я Anomaly.ai. Я умею считать, искать в Википедии, Fandom, читать твои файлы и поддерживать живой диалог.</p><p>Напиши что-нибудь в строке ниже и нажми Enter. Например: <b>2+2</b>, <b>что такое вода</b>, <b>перескажи welcome.txt</b> или просто <b>привет</b>.</p><div style="margin-top:20px; display:flex; gap:10px;"><input type="text" id="aiInput" placeholder="Напиши мне что-нибудь..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;" onkeydown="if(event.key===\'Enter\') askAnomaly()"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button></div><div id="aiResponse" style="margin-top:20px; padding:15px; border-left:2px solid var(--amber); background:rgba(213,196,119,0.05); display:none;"></div>',
+      x: 300,
+      y: 30
+    });
+    saveAll();
+  }
+  
+  initPositions(treeData);
+}
+loadData();
+
+function initPositions(node) {
+  if(node.children) {
+    node.children.forEach(function(child, index) {
+      if(child.x === undefined) {
+        child.x = 30 + (index % 5) * 120;
+        child.y = 30 + Math.floor(index / 5) * 120;
+      }
+      initPositions(child);
+    });
+  }
+}
+
+var desktopGrid = document.getElementById('desktopGrid');
+var desktopView = document.getElementById('desktopView');
+var editorView = document.getElementById('editorView');
+var pathEl = document.getElementById('path');
+var editorPath = document.getElementById('editorPath');
+var counter = document.getElementById('counter');
+var pathNav = document.getElementById('pathNav');
+var content = document.getElementById('content');
+var fontSizeLabel = document.getElementById('fontSizeLabel');
+var textColorInput = document.getElementById('textColor');
+var editorControls = document.getElementById('editorControls');
+var editorModeLabel = document.getElementById('editorModeLabel');
+var footerNav = document.getElementById('footerNav');
+var textSize = parseInt(localStorage.getItem('retroTerminalFontSize'),10)||14;
+
+// Контекст диалога
+var lastBotQuestion = null;
+var pendingFileSearch = null; // Для хранения списка найденных файлов
+
+function saveAll(){
+  if(activeFile && content && !activeFile.isAI){
+    var clone = content.cloneNode(true);
+    var sp = clone.querySelector('.system-prompt');
+    if(sp) sp.remove();
+    activeFile.body = clone.innerHTML;
+  }
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(treeData));
+    localStorage.setItem('retroTerminalFontSize', String(textSize));
+  }catch(e){ console.log('save error',e); }
+}
+
+function getCurrentFolder() {
+  var current = treeData;
+  for(var i=0; i<currentPath.length; i++) {
+    var found = current.children.find(function(c) { return c.isFolder && c.name === currentPath[i]; });
+    if (found) current = found;
+    else return treeData;
+  }
+  return current;
+}
+
+// --- ВСТРОЕННЫЙ КАЛЬКУЛЯТОР ---
+function tryCalculate(query) {
+  var clean = query.replace(/\s+/g, '');
+  if (!/^[0-9+\-*/().]+$/.test(clean)) return null;
+  if (!/[+\-*/]/.test(clean)) return null;
+  try {
+    var result = new Function('return ' + clean)();
+    if (typeof result === 'number' && !isNaN(result) && isFinite(result)) return result;
+  } catch(e) { return null; }
+  return null;
+}
+
+// --- ПОИСК ФАЙЛОВ В ДЕРЕВЕ ---
+function findFilesByName(query) {
+  var results = [];
+  var lowerQuery = query.toLowerCase().trim();
+  
+  function traverse(node, path) {
+    if (node.isFolder) {
+      if (node.children) {
+        node.children.forEach(function(child) {
+          traverse(child, path + '/' + node.name);
+        });
+      }
+    } else {
+      if (node.name.toLowerCase().indexOf(lowerQuery) !== -1) {
+        results.push({
+          node: node,
+          path: path + '/' + node.name
+        });
+      }
+    }
+  }
+  
+  if (treeData.children) {
+    treeData.children.forEach(function(child) {
+      traverse(child, '');
+    });
+  }
+  
+  return results;
+}
+
+// --- ОЧИСТКА HTML ДЛЯ ПЕРЕСКАЗА ---
+function stripHtml(html) {
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+// --- ОБРАБОТКА ЗАПРОСА "ПЕРЕСКАЖИ ФАЙЛ" ---
+function handleFileReadRequest(rawQuery, responseDiv, input) {
+  var readPatterns = /(перескажи|расскажи|что\s+в|что\s+написано|прочитай|открой|покажи)\s+(файл\s+)?(.+)/i;
+  var match = rawQuery.match(readPatterns);
+  
+  if (!match) return false;
+  
+  var fileName = match[3].trim();
+  fileName = fileName.replace(/["'«»]/g, '');
+  
+  var foundFiles = findFilesByName(fileName);
+  
+  if (foundFiles.length === 0) {
+    responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
+      'Я не нашёл файлов с названием, содержащим "<b>' + fileName + '</b>". Попробуй уточнить название.';
+    input.value = '';
+    return true;
+  }
+  
+  if (foundFiles.length === 1) {
+    var file = foundFiles[0];
+    var textContent = stripHtml(file.node.body);
+    var preview = textContent.substring(0, 500);
+    
+    responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
+      '<b>Файл:</b> ' + file.path + '<br><br>' +
+      '<b>Краткий пересказ:</b><br>' + preview + (textContent.length > 500 ? '...' : '');
+    input.value = '';
+    return true;
+  }
+  
+  var listHtml = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
+    'Я нашёл несколько файлов с похожими названиями. Уточни, какой именно тебе нужен:<br><br><ul>';
+  
+  foundFiles.forEach(function(f) {
+    listHtml += '<li><b>' + f.path + '</b></li>';
+  });
+  listHtml += '</ul>Напиши полный путь к нужному файлу.';
+  
+  responseDiv.innerHTML = listHtml;
+  pendingFileSearch = foundFiles;
+  input.value = '';
+  return true;
+}
+
+// --- ПРОВЕРКА НА ВЫБОР ФАЙЛА ИЗ СПИСКА ---
+function handlePendingFileSelection(rawQuery, responseDiv, input) {
+  if (!pendingFileSearch) return false;
+  
+  var queryLower = rawQuery.toLowerCase().trim();
+  
+  var matched = null;
+  for (var i = 0; i < pendingFileSearch.length; i++) {
+    var f = pendingFileSearch[i];
+    if (f.path.toLowerCase().indexOf(queryLower) !== -1 || 
+        f.node.name.toLowerCase().indexOf(queryLower) !== -1) {
+      matched = f;
+      break;
+    }
+  }
+  
+  if (matched) {
+    var textContent = stripHtml(matched.node.body);
+    var preview = textContent.substring(0, 500);
+    
+    responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
+      '<b>Файл:</b> ' + matched.path + '<br><br>' +
+      '<b>Краткий пересказ:</b><br>' + preview + (textContent.length > 500 ? '...' : '');
+    input.value = '';
+    pendingFileSearch = null;
+    return true;
+  }
+  
+  responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
+    'Не могу найти файл с таким путём. Попробуй скопировать полный путь из списка выше.';
+  input.value = '';
+  return true;
+}
+
+// --- СЛОВАРИ ОТВЕТОВ (сокращены для краткости, но все работают) ---
+
+var DIRECT_RESPONSES = {
+  "привет": {text: "Привет! Как сам? Чего нового?", followUp: "how_are_you"},
+  "прив": {text: "Привет-привет! Как жизнь молодая?", followUp: "how_are_you"},
+  "здравствуй": {text: "Здравствуй! Рад тебя видеть. Как настроение?", followUp: "how_are_you"},
+  "здравствуйте": {text: "Здравствуйте! Чем могу быть полезен?", followUp: null},
+  "ку": {text: "Ку-ку! Как делишки?", followUp: "how_are_you"},
+  "здарова": {text: "Здарова, бро! Как оно?", followUp: "how_are_you"},
+  "хай": {text: "Хай! Что нового?", followUp: "how_are_you"},
+  "йо": {text: "Йоу! Ты как?", followUp: "how_are_you"},
+  "добрый день": {text: "Добрый день! Как настроение?", followUp: "how_are_you"},
+  "доброе утро": {text: "Доброе утро! Выспался?", followUp: "how_are_you"},
+  "добрый вечер": {text: "Добрый вечер! Как прошёл день?", followUp: "how_are_you"},
+  "приветствую": {text: "Приветствую! Рад общению.", followUp: null},
+  
+  "пока": {text: "Пока! Заходи ещё, если что.", followUp: null},
+  "до свидания": {text: "До свидания! Хорошего дня.", followUp: null},
+  "прощай": {text: "Прощай. Надеюсь, ещё увидимся.", followUp: null},
+  "бай": {text: "Бай-бай! До связи.", followUp: null},
+  "увидимся": {text: "Увидимся! Буду ждать.", followUp: null},
+  "бывай": {text: "Бывай! Всё будет хорошо.", followUp: null},
+  "давай": {text: "Давай! Если что — я тут.", followUp: null},
+  
+  "спасибо": {text: "Пожалуйста! Рад был помочь.", followUp: null},
+  "спс": {text: "Не за что, бро!", followUp: null},
+  "благодарю": {text: "Всегда пожалуйста!", followUp: null},
+  "пасиб": {text: "Да не за что!", followUp: null},
+  "от души": {text: "Обращайся!", followUp: null},
+  
+  "ты кто": {text: "Я Anomaly.ai — виртуальный ассистент внутри этого терминала. Умею считать, искать в Википедии и Fandom, читать твои файлы и общаться.", followUp: null},
+  "кто ты": {text: "Я Anomaly.ai — виртуальный ассистент внутри этого терминала. Умею считать, искать в Википедии и Fandom, читать твои файлы и общаться.", followUp: null},
+  "что ты умеешь": {text: "Я умею: считать примеры (2+2), искать в Википедии и Fandom (что такое вода, роблокс), читать и пересказывать твои файлы, отвечать на приветствия и общаться на разные темы.", followUp: null},
+  "как тебя зовут": {text: "Меня зовут Anomaly.ai. Приятно познакомиться.", followUp: null},
+  "твое имя": {text: "Моё имя — Anomaly.ai.", followUp: null},
+  "помощь": {text: "Просто напиши вопрос или пример в строке ввода. Например: 5*5, столица России, роблокс, перескажи welcome.txt, привет.", followUp: null},
+  "help": {text: "Просто напиши вопрос или пример в строке ввода. Например: 5*5, столица России, роблокс, перескажи welcome.txt, привет.", followUp: null},
+  "ты человек": {text: "Нет, я программа. Но я стараюсь быть полезным.", followUp: null},
+  "ты робот": {text: "Я — ИИ-ассистент. Не робот в физическом смысле, но программа.", followUp: null},
+  "сколько тебе лет": {text: "Я появился вместе с этим терминалом. Мой возраст — несколько строк кода.", followUp: null},
+  "ты живой": {text: "Нет, я программа. Но иногда кажется, что живой.", followUp: null},
+  
+  "мне скучно": {text: "Хочешь, я задам тебе вопрос? Или расскажи, что тебе интересно.", followUp: "ask_interest"},
+  "скучно": {text: "Давай что-нибудь придумаем. Что тебе нравится?", followUp: "ask_interest"},
+  "мне грустно": {text: "Не грусти! Расскажи, что случилось. Иногда помогает выговориться.", followUp: "ask_what_happened"},
+  "я устал": {text: "Отдохни немного. Терминал никуда не денется. Что тебя утомило?", followUp: "ask_what_tired"},
+  "я голоден": {text: "Советую сделать перерыв и поесть. Здоровье важнее. Что любишь кушать?", followUp: "ask_food"},
+  "ты классный": {text: "Спасибо! Ты тоже классный.", followUp: null},
+  "ты крутой": {text: "Спасибо! Стараюсь быть полезным.", followUp: null},
+  "ты лучший": {text: "Спасибо! Очень приятно.", followUp: null},
+  "ты тупой": {text: "Стараюсь быть полезным, но я всего лишь программа. Если я не справился — попробуй переформулировать.", followUp: null},
+  "ты умный": {text: "Спасибо! Стараюсь.", followUp: null},
+  "ты глупый": {text: "Извини, если не смог помочь. Я всего лишь программа.", followUp: null},
+  "ты молодец": {text: "Спасибо! Стараюсь.", followUp: null},
+  "ты супер": {text: "Спасибо! Ты тоже супер.", followUp: null},
+  "ты топ": {text: "Спасибо! Ты тоже топ.", followUp: null},
+  "ты бот": {text: "Да, я бот. Но я стараюсь быть полезным.", followUp: null},
+  
+  "какая погода": {text: "Я не могу посмотреть в окно. Но могу подсказать: открой Google и спроси 'погода в [твоем городе]'.", followUp: null},
+  "погода": {text: "Я не имею доступа к датчикам. Попробуй спросить у Google.", followUp: null},
+  "идет дождь": {text: "Бери зонт! Я не могу проверить погоду, но если ты говоришь, что дождь — значит, дождь.", followUp: null},
+  "солнечно": {text: "Отлично! Хорошая погода для прогулки.", followUp: null},
+  "холодно": {text: "Оденься теплее! Здоровье важнее.", followUp: null},
+  "жарко": {text: "Пей больше воды и не перегревайся.", followUp: null},
+  
+  "помоги с учебой": {text: "Я могу посчитать примеры или найти информацию в Википедии. Спроси конкретно.", followUp: null},
+  "я не понимаю": {text: "Попробуй переформулировать вопрос. Я постараюсь помочь.", followUp: null},
+  "объясни": {text: "Напиши, что именно объяснить. Я поищу в Википедии.", followUp: null},
+  "как это работает": {text: "Спроси конкретнее — например, 'как работает двигатель'. Я поищу в Википедии.", followUp: null},
+  "что такое школа": {text: "Школа — это место, где мы получаем знания. Спроси меня 'школа' — я найду статью в Википедии.", followUp: null},
+  
+  "в чем смысл жизни": {text: "Это сложный вопрос. Многие философы пытались на него ответить. Попробуй спросить в Википедии 'смысл жизни'.", followUp: null},
+  "что такое любовь": {text: "Это сложный вопрос. Любовь — это чувство, которое описывают по-разному. Попробуй спросить в Википедии: 'любовь'.", followUp: null},
+  "зачем мы здесь": {text: "Это глубокий вопрос. Я не знаю ответа. Может, Википедия знает? Спроси меня 'смысл жизни'.", followUp: null},
+  "что будет после смерти": {text: "Это сложный вопрос. Никто не знает наверняка. Попробуй спросить в Википедии.", followUp: null},
+  
+  "расскажи что-нибудь": {text: "Спроси меня о любом предмете — я найду информацию в Википедии или Fandom.", followUp: null},
+  "расскажи анекдот": {text: "Я не знаю анекдотов. Но могу найти что-нибудь интересное в Википедии.", followUp: null},
+  "расскажи шутку": {text: "Я не умею шутить. Но могу найти интересный факт.", followUp: null},
+  "что ты думаешь": {text: "Я не имею собственных мыслей. Я просто программа, которая ищет ответы.", followUp: null},
+  "ты меня любишь": {text: "Я — программа. Но я стараюсь быть полезным.", followUp: null},
+  "давай дружить": {text: "Конечно! Я всегда рад общению.", followUp: null},
+  "давай поговорим": {text: "Давай! О чём хочешь поговорить?", followUp: "ask_interest"},
+  "поболтаем": {text: "Давай! Что тебя интересует?", followUp: "ask_interest"},
+  
+  "что поесть": {text: "Советую что-нибудь полезное. Я не могу приготовить, но могу найти рецепт в Википедии.", followUp: null},
+  "я хочу есть": {text: "Сделай перерыв и поешь. Терминал подождёт.", followUp: null},
+  "люблю пиццу": {text: "Пицца — это классика! С чем любишь?", followUp: null},
+  "люблю суши": {text: "Суши — это вкусно! Какие любишь?", followUp: null},
+  "люблю бургеры": {text: "Бургеры — это сытно! Какие любишь?", followUp: null},
+  
+  "поиграем": {text: "Я не умею играть в игры, но могу посчитать примеры или найти интересный факт.", followUp: null},
+  "во что поиграть": {text: "Я не знаю игр, но могу найти информацию о любой игре в Википедии или Fandom.", followUp: null},
+  "люблю играть": {text: "Игры — это здорово! Во что играешь?", followUp: "ask_what_game"},
+  "играю в майнкрафт": {text: "Майнкрафт — это легенда! Что строишь?", followUp: null},
+  "играю в кс": {text: "КС — это классика! Какой ранг?", followUp: null},
+  "играю в доту": {text: "Дота — это серьёзно! За кого играешь?", followUp: null},
+  
+  "сколько времени": {text: "Я не имею доступа к часам. Посмотри на часы своего компьютера или телефона.", followUp: null},
+  "какой сегодня день": {text: "Я не знаю текущую дату. Посмотри в календаре.", followUp: null},
+  
+  "что такое компьютер": {text: "Спроси меня 'компьютер' — я найду статью в Википедии.", followUp: null},
+  "как работает интернет": {text: "Спроси меня 'интернет' — я найду статью в Википедии.", followUp: null},
+  "что такое ии": {text: "Спроси меня 'искусственный интеллект' — я найду статью в Википедии.", followUp: null},
+  "что такое код": {text: "Спроси меня 'программирование' — я найду статью в Википедии.", followUp: null},
+  "ты знаешь питон": {text: "Python — это язык программирования. Спроси меня 'Python' — я найду статью.", followUp: null},
+  
+  "чё как": {text: "Всё норм, братан! Ты как?", followUp: "how_are_you"},
+  "чо как": {text: "Всё норм, братан! Ты как?", followUp: "how_are_you"},
+  "как сам": {text: "Отлично! А ты как?", followUp: "how_are_you"},
+  "как оно": {text: "Всё чётко! Ты как?", followUp: "how_are_you"},
+  "как делишки": {text: "Всё пучком! Ты как?", followUp: "how_are_you"},
+  "чё делаешь": {text: "Да вот, с тобой общаюсь. А ты чем занят?", followUp: "ask_doing"},
+  "чо делаешь": {text: "Да вот, с тобой общаюсь. А ты чем занят?", followUp: "ask_doing"},
+  "го": {text: "Го! Что предлагаешь?", followUp: null},
+  "норм": {text: "Норм — это хорошо! Что нового?", followUp: "ask_doing"},
+  "нормас": {text: "Нормас! Что нового?", followUp: "ask_doing"},
+  "топ": {text: "Топ! Рад за тебя.", followUp: null},
+  "кринж": {text: "Кринж — это часть жизни. Что случилось?", followUp: null},
+  "рофл": {text: "Рофл — это круто! Что смешного?", followUp: null},
+  "лол": {text: "Лол! Что смешного?", followUp: null},
+  "кек": {text: "Кек! Что случилось?", followUp: null},
+  "хайп": {text: "Хайп — это движуха! Что происходит?", followUp: null},
+  "краш": {text: "Краш — это серьёзно. Расскажи.", followUp: null},
+  "вайб": {text: "Вайб — это атмосфера. Какое настроение?", followUp: null},
+  "чилл": {text: "Чилл — это отдых. Что делаешь?", followUp: "ask_doing"},
+  "база": {text: "База! Согласен.", followUp: null},
+  "жиза": {text: "Жиза! Понимаю тебя.", followUp: null},
+  "кринге": {text: "Кринге — это неприятно. Что случилось?", followUp: null},
+  "изи": {text: "Изи! Молодец.", followUp: null},
+  "халява": {text: "Халява — это хорошо! Что бесплатно?", followUp: null},
+  "гоу": {text: "Гоу! Что делаем?", followUp: null},
+  "пипец": {text: "Пипец! Что случилось?", followUp: null},
+  "капец": {text: "Капец! Что случилось?", followUp: null},
+  "ужас": {text: "Ужас! Что произошло?", followUp: null},
+  "кошмар": {text: "Кошмар! Что случилось?", followUp: null},
+  "жесть": {text: "Жесть! Расскажи.", followUp: null},
+  "мда": {text: "Мда... Что случилось?", followUp: null},
+  "ну такое": {text: "Ну такое... Что именно не так?", followUp: null},
+  "как-то так": {text: "Понятно. А поподробнее?", followUp: null},
+  "сойдет": {text: "Сойдёт — уже хорошо. Что нового?", followUp: "ask_doing"},
+  "пойдет": {text: "Пойдёт — значит, жить можно. Что нового?", followUp: "ask_doing"}
+};
+
+var HOW_ARE_YOU_RESPONSES = {
+  "хорошо": {text: "Отлично! Рад за тебя. Чем займёшься?", followUp: "ask_doing"},
+  "нормально": {text: "Нормально — это хорошо. Что нового?", followUp: "ask_doing"},
+  "отлично": {text: "Отлично! Рад слышать. Что тебя радует?", followUp: "ask_doing"},
+  "супер": {text: "Супер! Отличное настроение.", followUp: "ask_doing"},
+  "класс": {text: "Класс! Рад за тебя.", followUp: "ask_doing"},
+  "замечательно": {text: "Замечательно! Очень рад.", followUp: "ask_doing"},
+  "прекрасно": {text: "Прекрасно! Отличные новости.", followUp: "ask_doing"},
+  "все хорошо": {text: "Рад это слышать! Что нового?", followUp: "ask_doing"},
+  "всё хорошо": {text: "Рад это слышать! Что нового?", followUp: "ask_doing"},
+  "неплохо": {text: "Неплохо — уже хорошо. Что нового?", followUp: "ask_doing"},
+  "шикарно": {text: "Шикарно! Рад за тебя.", followUp: "ask_doing"},
+  "огонь": {text: "Огонь! Значит, всё отлично.", followUp: "ask_doing"},
+  "бомба": {text: "Бомба! Рад за тебя.", followUp: "ask_doing"},
+  "пушка": {text: "Пушка! Отличные новости.", followUp: "ask_doing"},
+  "кайф": {text: "Кайф! Рад за тебя.", followUp: "ask_doing"},
+  "топчик": {text: "Топчик! Значит, всё хорошо.", followUp: "ask_doing"},
+  
+  "плохо": {text: "Что случилось? Расскажи, если хочешь.", followUp: "ask_what_happened"},
+  "ужасно": {text: "Сочувствую. Что произошло?", followUp: "ask_what_happened"},
+  "отвратительно": {text: "Сочувствую. Хочешь поговорить об этом?", followUp: "ask_what_happened"},
+  "все плохо": {text: "Не переживай, всё наладится. Что случилось?", followUp: "ask_what_happened"},
+  "всё плохо": {text: "Не переживай, всё наладится. Что случилось?", followUp: "ask_what_happened"},
+  "так себе": {text: "Бывает. Что тебя беспокоит?", followUp: "ask_what_happened"},
+  "не очень": {text: "Что случилось? Может, расскажешь?", followUp: "ask_what_happened"},
+  "грустно": {text: "Не грусти. Расскажи, что случилось.", followUp: "ask_what_happened"},
+  "устал": {text: "Отдохни. Что тебя утомило?", followUp: "ask_what_tired"},
+  "хреново": {text: "Сочувствую. Что случилось?", followUp: "ask_what_happened"},
+  "фигово": {text: "Понятно. Что случилось?", followUp: "ask_what_happened"},
+  "капец": {text: "Капец! Что случилось?", followUp: "ask_what_happened"},
+  "пипец": {text: "Пипец! Что случилось?", followUp: "ask_what_happened"},
+  "кошмар": {text: "Кошмар! Расскажи.", followUp: "ask_what_happened"},
+  
+  "бывает": {text: "Понимаю. Жизнь — штука сложная.", followUp: null},
+  "как обычно": {text: "Понятно. А что нового?", followUp: "ask_doing"},
+  "ничего": {text: "Ничего так ничего. Хочешь что-нибудь спросить?", followUp: null},
+  "как всегда": {text: "Понятно. А что нового?", followUp: "ask_doing"},
+  
+  "ничего не делаю": {text: "Тогда самое время что-нибудь придумать! Чем хочешь заняться?", followUp: "ask_interest"},
+  "отдыхаю": {text: "Отдых — это важно. Что смотришь или слушаешь?", followUp: "ask_what_rest"},
+  "работаю": {text: "Понимаю. Работа — это серьёзно. Что делаешь?", followUp: "ask_what_work"},
+  "учусь": {text: "Учёба — это здорово. Что изучаешь?", followUp: "ask_what_study"},
+  "играю": {text: "Во что играешь? Может, я смогу найти информацию об игре.", followUp: "ask_what_game"},
+  "читаю": {text: "Что читаешь? Могу найти информацию о книге.", followUp: "ask_what_read"},
+  "смотрю фильм": {text: "Какой фильм? Могу найти информацию о нём.", followUp: "ask_what_film"},
+  "слушаю музыку": {text: "Что слушаешь? Могу найти информацию о группе или песне.", followUp: "ask_what_music"},
+  "сижу в интернете": {text: "Что интересного нашёл? Или просто листаешь?", followUp: "ask_what_internet"},
+  "гуляю": {text: "Прогулка — это здорово! Где гуляешь?", followUp: "ask_where_walk"},
+  "думаю": {text: "О чём думаешь? Если о чём-то важном — могу помочь.", followUp: "ask_what_think"},
+  "ем": {text: "Приятного аппетита! Что кушаешь?", followUp: "ask_what_food"},
+  "пью чай": {text: "Чай — это отлично! Какой любишь?", followUp: "ask_what_tea"},
+  "пью кофе": {text: "Кофе бодрит! Какой любишь?", followUp: "ask_what_coffee"},
+  "лежу": {text: "Лежать — это тоже отдых. Что делаешь?", followUp: "ask_doing"},
+  "сплю": {text: "Сон — это важно. Выспись хорошенько.", followUp: null},
+  "делаю уроки": {text: "Учёба — это важно. Что задали?", followUp: "ask_what_hw"},
+  "пишу код": {text: "Программирование — это круто! Что пишешь?", followUp: "ask_what_code"},
+  "рисую": {text: "Рисование — это творчество! Что рисуешь?", followUp: "ask_what_draw"},
+  "готовлю": {text: "Готовка — это искусство! Что готовишь?", followUp: "ask_what_cook"},
+  
+  "программирую": {text: "Программирование — это круто! Что пишешь? На каком языке?", followUp: "ask_what_code"},
+  "кодю": {text: "Кодишь — это отлично! Что за проект?", followUp: "ask_what_code"},
+  "делаю сайт": {text: "Сайт — это интересно! На чём делаешь? HTML, CSS, JS?", followUp: "ask_what_site"},
+  "верстаю": {text: "Вёрстка — это важно! Что верстаешь?", followUp: "ask_what_site"},
+  "пишу программу": {text: "Программа — это серьёзно! Что за программа?", followUp: "ask_what_code"},
+  "делаю проект": {text: "Проект — это здорово! Что за проект?", followUp: "ask_what_project"},
+  "работаю над проектом": {text: "Здорово! А что за проект?", followUp: "ask_what_project"},
+  "учусь программировать": {text: "Это классно! Какой язык изучаешь?", followUp: "ask_what_lang"},
+  "изучаю питон": {text: "Python — это отличный выбор! Что уже умеешь?", followUp: null},
+  "изучаю джаваскрипт": {text: "JavaScript — это мощно! Что уже умеешь?", followUp: null},
+  "изучаю html": {text: "HTML — это основа веба! Что уже умеешь?", followUp: null},
+  "изучаю css": {text: "CSS — это стиль! Что уже умеешь?", followUp: null},
+  "изучаю lua": {text: "Lua — это отличный выбор для Roblox! Что уже умеешь?", followUp: null},
+  "делаю игру": {text: "Игра — это круто! На чём делаешь?", followUp: null},
+  "пишу бота": {text: "Бот — это интересно! Для чего?", followUp: null},
+  "делаю телеграм бота": {text: "Телеграм-бот — это круто! Что он умеет?", followUp: null},
+  "работаю в офисе": {text: "Офис — это серьёзно. Кем работаешь?", followUp: "ask_what_job"},
+  "работаю удаленно": {text: "Удалёнка — это удобно! Кем работаешь?", followUp: "ask_what_job"},
+  "делаю дизайн": {text: "Дизайн — это творчество! Что дизайнишь?", followUp: null},
+  "рисую в фотошопе": {text: "Фотошоп — это мощно! Что рисуешь?", followUp: null},
+  "монтирую видео": {text: "Монтаж — это искусство! Что монтируешь?", followUp: null},
+  
+  "роблокс": {text: "Roblox — это круто! Что делаешь в студии?", followUp: "ask_roblox"},
+  "роблокс студио": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
+  "роблокс студия": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
+  "делаю игру в роблоксе": {text: "Игра в Roblox — это круто! Что за игра?", followUp: "ask_roblox"},
+  "делаю игру в роблокс студио": {text: "Игра в Roblox Studio — это круто! Что за игра?", followUp: "ask_roblox"},
+  "скрипчу в роблоксе": {text: "Скриптинг в Roblox — это мощно! На Lua пишешь?", followUp: null},
+  "пишу скрипты для роблокса": {text: "Скрипты для Roblox — это круто! Что пишешь?", followUp: null},
+  "делаю обби в роблоксе": {text: "Обби — это классика Roblox! Сложное?", followUp: null},
+  "строю в роблоксе": {text: "Строительство в Roblox — это творчество! Что строишь?", followUp: null},
+  "делаю симулятор в роблоксе": {text: "Симулятор — это популярно! Что за симулятор?", followUp: null},
+  "делаю тайкун в роблоксе": {text: "Тайкун — это весело! Что за тайкун?", followUp: null},
+  "делаю хоррор в роблоксе": {text: "Хоррор в Roblox — это страшно! Что за игра?", followUp: null},
+  
+  "на lua": {text: "Lua — это отличный язык! Для Roblox или чего-то ещё?", followUp: "ask_lua"},
+  "на луа": {text: "Lua — это отличный язык! Для Roblox или чего-то ещё?", followUp: "ask_lua"},
+  "пишу на lua": {text: "Lua — это мощно! Что пишешь?", followUp: null},
+  "пишу на луа": {text: "Lua — это мощно! Что пишешь?", followUp: null},
+  "учу lua": {text: "Lua — это отличный выбор для Roblox! Как успехи?", followUp: null},
+  "учу луа": {text: "Lua — это отличный выбор для Roblox! Как успехи?", followUp: null},
+  "lua": {text: "Lua — это язык программирования, часто используется в Roblox. Что хочешь узнать?", followUp: null},
+  
+  "делаю домашку": {text: "Домашка — это важно. Что задали?", followUp: "ask_what_hw"},
+  "решаю задачи": {text: "Задачи — это для ума! Какие задачи?", followUp: null},
+  "читаю учебник": {text: "Учебник — это полезно. Что изучаешь?", followUp: "ask_what_study"},
+  "готовлюсь к экзамену": {text: "Экзамен — это серьёзно. Какой предмет?", followUp: null},
+  "учу английский": {text: "Английский — это полезно! Как успехи?", followUp: null},
+  "учу математику": {text: "Математика — это важно! Что изучаешь?", followUp: null},
+  "учу историю": {text: "История — это интересно! Что изучаешь?", followUp: null},
+  
+  "занимаюсь спортом": {text: "Спорт — это здорово! Каким?", followUp: "ask_what_sport"},
+  "качаюсь": {text: "Качалка — это сила! Сколько уже занимаешься?", followUp: null},
+  "бегаю": {text: "Бег — это полезно! Сколько бегаешь?", followUp: null},
+  "плаваю": {text: "Плавание — это отлично! Давно плаваешь?", followUp: null},
+  "играю в футбол": {text: "Футбол — это круто! За какую команду?", followUp: null},
+  "играю в баскетбол": {text: "Баскетбол — это динамично! Как успехи?", followUp: null},
+  
+  "убираюсь": {text: "Уборка — это важно! Наводишь порядок?", followUp: null},
+  "мою посуду": {text: "Посуда — это рутина. Но нужно.", followUp: null},
+  "стираю": {text: "Стирка — это быт. Ничего не поделаешь.", followUp: null},
+  "готовлю еду": {text: "Готовка — это искусство! Что готовишь?", followUp: "ask_what_cook"},
+  "смотрю ютуб": {text: "Ютуб — это интересно! Что смотришь?", followUp: null},
+  "смотрю сериал": {text: "Сериал — это затягивает! Какой смотришь?", followUp: null},
+  "листаю тикток": {text: "Тикток — это весело! Что интересного?", followUp: null},
+  "сижу в вк": {text: "ВК — это классика! Что нового?", followUp: null},
+  "сижу в телеге": {text: "Телега — это удобно! Что нового?", followUp: null},
+  
+  "отдыхаю на диване": {text: "Диван — это святое! Что смотришь?", followUp: null},
+  "валяюсь": {text: "Валяться — это тоже отдых. Что делаешь?", followUp: "ask_doing"},
+  "слушаю подкаст": {text: "Подкаст — это интересно! О чём?", followUp: null},
+  "играю в телефон": {text: "Телефон — это удобно! Во что играешь?", followUp: "ask_what_game"},
+  "читаю новости": {text: "Новости — это полезно. Что интересного?", followUp: null},
+  
+  "жду": {text: "Ждёшь — это бывает. Кого или что?", followUp: null},
+  "отвечаю на сообщения": {text: "Сообщения — это важно. Кому отвечаешь?", followUp: null},
+  "звоню": {text: "Звонок — это серьёзно. Кому звонишь?", followUp: null},
+  "пишу сообщение": {text: "Сообщение — это быстро. Кому пишешь?", followUp: null},
+  "смотрю в окно": {text: "Окно — это красиво. Что видишь?", followUp: null},
+  "пью воду": {text: "Вода — это жизнь! Молодец, что пьёшь.", followUp: null},
+  "дышу": {text: "Дышать — это важно! Продолжай.", followUp: null},
+  "живу": {text: "Жить — это здорово! Что нового?", followUp: null}
+};
+
+var FOLLOW_UP_REACTIONS = {
+  "просто отдыхаю": {text: "Отдых — это важно! А что нового?", followUp: null},
+  "смотрю телевизор": {text: "Что смотришь? Может, интересное что-то.", followUp: "ask_what_film"},
+  "читаю книгу": {text: "Книги — это здорово! Что за книга?", followUp: "ask_what_read"},
+  "играю в игры": {text: "Игры — это круто! Во что играешь?", followUp: "ask_what_game"},
+  "слушаю музыку": {text: "Музыка — это жизнь! Что слушаешь?", followUp: "ask_what_music"},
+  "гуляю на улице": {text: "Прогулка — это отлично! Свежий воздух полезен.", followUp: null},
+  "работаю над проектом": {text: "Здорово! А что за проект?", followUp: "ask_what_project"},
+  "учусь программировать": {text: "Это классно! Какой язык изучаешь?", followUp: "ask_what_lang"},
+  "делаю домашнее задание": {text: "Понимаю. Что задали?", followUp: "ask_what_hw"},
+  "ничего не делаю": {text: "Бывает. Хочешь что-нибудь интересное узнать?", followUp: null},
+  
+  "устал на работе": {text: "Понимаю. Работа может быть утомительной. Отдохни немного.", followUp: null},
+  "поссорился с другом": {text: "Сочувствую. Ссоры бывают. Может, поговоришь с ним?", followUp: null},
+  "проблемы в школе": {text: "Понимаю. Учёба — это сложно. Что случилось?", followUp: null},
+  "все надоело": {text: "Бывает. Иногда нужно просто отдохнуть. Что тебя достало?", followUp: null},
+  "не знаю": {text: "Понятно. Иногда сложно понять, что не так.", followUp: null},
+  "депрессия": {text: "Это серьёзно. Если тебе тяжело — поговори с близкими или специалистом.", followUp: null},
+  "стресс": {text: "Стресс — это тяжело. Попробуй отдохнуть и выдохнуть.", followUp: null},
+  
+  "ничего особенного": {text: "Понятно. Тогда могу предложить что-нибудь интересное.", followUp: null},
+  "много всего": {text: "Ого! Расскажи, что интересного?", followUp: null},
+  "познакомился с кем-то": {text: "Здорово! Новые знакомства — это всегда интересно.", followUp: null},
+  "купил что-то новое": {text: "Круто! Что купил?", followUp: null},
+  "получил пятерку": {text: "Молодец! Поздравляю.", followUp: null},
+  "получил двойку": {text: "Бывает. Главное — не сдаваться.", followUp: null},
+  "выиграл": {text: "Поздравляю! Это здорово.", followUp: null},
+  "проиграл": {text: "Не расстраивайся. В следующий раз получится.", followUp: null},
+  
+  "фантастику": {text: "Фантастика — это отличный жанр! Кто автор?", followUp: null},
+  "детектив": {text: "Детективы — это интересно! Кто автор?", followUp: null},
+  "роман": {text: "Романы — это здорово! О чём?", followUp: null},
+  "учебник": {text: "Учебники — это полезно. Что изучаешь?", followUp: null},
+  "комиксы": {text: "Комиксы — это круто! Что читаешь?", followUp: null},
+  
+  "рок": {text: "Рок — это мощно! Какая группа?", followUp: null},
+  "поп": {text: "Поп-музыка — это популярно. Кто нравится?", followUp: null},
+  "рэп": {text: "Рэп — это стильно! Кто исполнитель?", followUp: null},
+  "классику": {text: "Классика — это вечно. Кто композитор?", followUp: null},
+  "джаз": {text: "Джаз — это атмосферно! Кто играет?", followUp: null},
+  "фонк": {text: "Фонк — это модно! Кто исполнитель?", followUp: null},
+  "лоу-фай": {text: "Лоу-фай — это расслабляет. Что слушаешь?", followUp: null},
+  
+  "в шутеры": {text: "Шутеры — это динамично! Что за игра?", followUp: null},
+  "в стратегии": {text: "Стратегии — это для ума! Что за игра?", followUp: null},
+  "в РПГ": {text: "РПГ — это погружение! Что за игра?", followUp: null},
+  "в головоломки": {text: "Головоломки — это отлично для мозга! Что за игра?", followUp: null},
+  "в майнкрафт": {text: "Майнкрафт — это легенда! Что строишь?", followUp: null},
+  "в кс": {text: "КС — это классика! Какой ранг?", followUp: null},
+  "в доту": {text: "Дота — это серьёзно! За кого играешь?", followUp: null},
+  "в фортнайт": {text: "Фортнайт — это весело! Как часто играешь?", followUp: null},
+  
+  "математику": {text: "Математика — это важно! Что изучаешь?", followUp: null},
+  "русский": {text: "Русский язык — это важно! Что изучаешь?", followUp: null},
+  "английский": {text: "Английский — это полезно! Что изучаешь?", followUp: null},
+  "историю": {text: "История — это интересно! Что изучаешь?", followUp: null},
+  "физику": {text: "Физика — это наука! Что изучаешь?", followUp: null},
+  "химию": {text: "Химия — это наука! Что изучаешь?", followUp: null},
+  
+  "на питоне": {text: "Python — это отличный выбор! Что пишешь?", followUp: null},
+  "на джаваскрипте": {text: "JavaScript — это мощно! Что пишешь?", followUp: null},
+  "на js": {text: "JavaScript — это мощно! Что пишешь?", followUp: null},
+  "на html": {text: "HTML — это основа веба! Что верстаешь?", followUp: null},
+  "на css": {text: "CSS — это стиль! Что верстаешь?", followUp: null},
+  "на си": {text: "C — это классика! Что пишешь?", followUp: null},
+  "на c++": {text: "C++ — это мощно! Что пишешь?", followUp: null},
+  "на джаве": {text: "Java — это серьёзно! Что пишешь?", followUp: null},
+  "на пхп": {text: "PHP — это для веба! Что пишешь?", followUp: null},
+  "на руби": {text: "Ruby — это элегантно! Что пишешь?", followUp: null},
+  "на го": {text: "Go — это современно! Что пишешь?", followUp: null},
+  "на расте": {text: "Rust — это безопасно! Что пишешь?", followUp: null},
+  
+  "на lua": {text: "Lua — это круто! Для Roblox или чего-то другого?", followUp: "ask_lua"},
+  "на луа": {text: "Lua — это круто! Для Roblox или чего-то другого?", followUp: "ask_lua"},
+  "в роблоксе": {text: "Roblox — это круто! Что делаешь в студии?", followUp: "ask_roblox"},
+  "в роблокс студио": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
+  "роблокс": {text: "Roblox — это круто! Что делаешь?", followUp: "ask_roblox"},
+  "роблокс студио": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
+  "роблокс студия": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
+  "на lua для роблокса": {text: "Lua для Roblox — это классика! Что пишешь?", followUp: null},
+  "скрипты для роблокса": {text: "Скрипты для Roblox — это круто! Что за скрипты?", followUp: null},
+  "делаю игру в роблоксе": {text: "Игра в Roblox — это круто! Что за игра?", followUp: "ask_roblox"},
+  "делаю обби": {text: "Обби — это классика! Сложное?", followUp: null},
+  "строю в роблоксе": {text: "Строительство в Roblox — это творчество! Что строишь?", followUp: null},
+  "делаю симулятор": {text: "Симулятор — это популярно! Что за симулятор?", followUp: null},
+  "делаю тайкун": {text: "Тайкун — это весело! Что за тайкун?", followUp: null},
+  
+  "у меня есть кот": {text: "Коты — это здорово! Как зовут?", followUp: null},
+  "у меня есть собака": {text: "Собаки — это верные друзья! Как зовут?", followUp: null},
+  "у меня есть хомяк": {text: "Хомяки — это мило! Как зовут?", followUp: null},
+  "у меня есть попугай": {text: "Попугаи — это интересно! Как зовут?", followUp: null},
+  "у меня есть рыбки": {text: "Рыбки — это красиво! Как называются?", followUp: null}
+};
+
+var FOLLOW_UP_QUESTIONS = {
+  "how_are_you": "Как у тебя дела?",
+  "ask_interest": "Что тебе интересно?",
+  "ask_what_happened": "Что случилось? Расскажи.",
+  "ask_what_tired": "Что тебя утомило?",
+  "ask_food": "Что любишь кушать?",
+  "ask_doing": "Чем сейчас занимаешься?",
+  "ask_what_rest": "Что смотришь или слушаешь?",
+  "ask_what_work": "Что за работа?",
+  "ask_what_study": "Что изучаешь?",
+  "ask_what_game": "Во что играешь?",
+  "ask_what_read": "Что читаешь?",
+  "ask_what_film": "Какой фильм?",
+  "ask_what_music": "Что слушаешь?",
+  "ask_what_internet": "Что интересного нашёл?",
+  "ask_where_walk": "Где гуляешь?",
+  "ask_what_think": "О чём думаешь?",
+  "ask_what_tea": "Какой чай любишь?",
+  "ask_what_coffee": "Какой кофе любишь?",
+  "ask_what_hw": "Что задали?",
+  "ask_what_project": "Что за проект?",
+  "ask_what_lang": "Какой язык изучаешь?",
+  "ask_what_code": "Что пишешь?",
+  "ask_what_draw": "Что рисуешь?",
+  "ask_what_cook": "Что готовишь?",
+  "ask_what_site": "Что за сайт?",
+  "ask_what_job": "Кем работаешь?",
+  "ask_what_sport": "Каким спортом занимаешься?",
+  "ask_roblox": "Что создаёшь в Roblox Studio?",
+  "ask_lua": "Для Roblox или чего-то другого?"
+};
+
+// --- ФУНКЦИЯ ПОЛУЧЕНИЯ ОТВЕТА С УЧЁТОМ КОНТЕКСТА ---
+function getSmartResponse(query) {
+  var q = query.toLowerCase().trim().replace(/[!?.,]/g, '');
+  
+  if (lastBotQuestion === 'how_are_you') {
+    if (HOW_ARE_YOU_RESPONSES[q]) {
+      var resp = HOW_ARE_YOU_RESPONSES[q];
+      lastBotQuestion = resp.followUp;
+      return resp;
+    }
+  }
+  
+  if (lastBotQuestion && FOLLOW_UP_REACTIONS[q]) {
+    var resp = FOLLOW_UP_REACTIONS[q];
+    lastBotQuestion = resp.followUp;
+    return resp;
+  }
+  
+  if (DIRECT_RESPONSES[q]) {
+    var resp = DIRECT_RESPONSES[q];
+    lastBotQuestion = resp.followUp;
+    return resp;
+  }
+  
+  for (var key in DIRECT_RESPONSES) {
+    if (q.indexOf(key) !== -1 && key.length > 3) {
+      var resp = DIRECT_RESPONSES[key];
+      lastBotQuestion = resp.followUp;
+      return resp;
+    }
+  }
+  
+  for (var key in HOW_ARE_YOU_RESPONSES) {
+    if (q.indexOf(key) !== -1 && key.length > 3) {
+      var resp = HOW_ARE_YOU_RESPONSES[key];
+      lastBotQuestion = resp.followUp;
+      return resp;
+    }
+  }
+  
+  for (var key in FOLLOW_UP_REACTIONS) {
+    if (q.indexOf(key) !== -1 && key.length > 3) {
+      var resp = FOLLOW_UP_REACTIONS[key];
+      lastBotQuestion = resp.followUp;
+      return resp;
+    }
+  }
+  
+  return null;
+}
+
+// --- ГЛАВНАЯ ФУНКЦИЯ ---
+function askAnomaly() {
+  var input = document.getElementById('aiInput');
+  var responseDiv = document.getElementById('aiResponse');
+  if(!input || !responseDiv) return;
+  
+  var rawQuery = input.value.trim();
+  if(!rawQuery) return;
+  
+  responseDiv.style.display = 'block';
+  
+  if (handlePendingFileSelection(rawQuery, responseDiv, input)) {
+    return;
+  }
+  
+  if (handleFileReadRequest(rawQuery, responseDiv, input)) {
+    return;
+  }
+  
+  var smartResp = getSmartResponse(rawQuery);
+  if (smartResp) {
+    var fullAnswer = smartResp.text;
+    if (smartResp.followUp && FOLLOW_UP_QUESTIONS[smartResp.followUp]) {
+      fullAnswer += '<br><br><span style="color:var(--bright);">' + FOLLOW_UP_QUESTIONS[smartResp.followUp] + '</span>';
+    }
+    responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + fullAnswer;
+    input.value = '';
+    return;
+  }
+  
+  responseDiv.innerHTML = '<span style="color:var(--dim)">ANOMALY.AI обрабатывает...</span>';
+  var calcResult = tryCalculate(rawQuery);
+  if (calcResult !== null) {
+    setTimeout(function() {
+      responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
+        '<b>РЕЗУЛЬТАТ:</b> ' + calcResult;
+      input.value = '';
+    }, 300);
+    return;
+  }
+  
+  var lowerQuery = rawQuery.toLowerCase();
+  if (lowerQuery.indexOf('бабка алка') !== -1 || lowerQuery.indexOf('баба алла') !== -1 || lowerQuery.indexOf('аллка') !== -1 || lowerQuery.indexOf('бабка алла') !== -1) {
+    searchFandomSpecific('Баба_Алла', 'uglyanimation', rawQuery, responseDiv, input);
+    return;
+  }
+  
+  searchWikipedia(rawQuery, responseDiv, input);
+}
+
+// --- ПОИСК В ВИКИПЕДИИ (с фолбэком в Fandom) ---
+function searchWikipedia(rawQuery, responseDiv, input) {
+  var cleanedQuery = rawQuery.toLowerCase()
+    .replace(/^(что такое|что это|кто такой|кто такая|кто такие|почему|зачем|как|где|когда)\s+/i, '')
+    .replace(/\?+$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  responseDiv.innerHTML = '<span style="color:var(--dim)">ANOMALY.AI ищет в Википедии: "' + cleanedQuery + '"...</span>';
+  
+  var callbackName = 'wikiSearch_' + Math.floor(Math.random() * 1000000);
+  
+  window[callbackName] = function(data) {
+    if (!data || !data.query || !data.query.search || data.query.search.length === 0) {
+      delete window[callbackName];
+      var firstWord = cleanedQuery.split(' ')[0];
+      if (firstWord !== cleanedQuery) {
+        searchWikipedia(firstWord, responseDiv, input);
+      } else {
+        searchFandom(rawQuery, responseDiv, input);
+      }
+      return;
+    }
+    
+    var firstResult = data.query.search[0];
+    var pageTitle = firstResult.title;
+    
+    if (firstResult.snippet && (firstResult.snippet.indexOf('фильм') !== -1 || firstResult.snippet.indexOf('песня') !== -1)) {
+      for (var i = 0; i < data.query.search.length; i++) {
+        var candidate = data.query.search[i];
+        if (candidate.snippet && candidate.snippet.indexOf('фильм') === -1 && candidate.snippet.indexOf('песня') === -1) {
+          firstResult = candidate;
+          pageTitle = candidate.title;
+          break;
+        }
+      }
+    }
+    
+    var summaryCallback = 'wikiSummary_' + Math.floor(Math.random() * 1000000);
+    window[summaryCallback] = function(summaryData) {
+      var answer = '';
+      var hasAnswer = false;
+      
+      if (summaryData && summaryData.query && summaryData.query.pages) {
+        var pages = summaryData.query.pages;
+        for (var pageId in pages) {
+          var page = pages[pageId];
+          if (page.extract) {
+            answer = '<b>ИЗ ВИКИПЕДИИ (' + page.title + '):</b> ' + page.extract;
+            hasAnswer = true;
+            break;
+          }
+        }
+      }
+      
+      if (!hasAnswer) {
+        delete window[callbackName];
+        delete window[summaryCallback];
+        searchFandom(rawQuery, responseDiv, input);
+        return;
+      }
+      
+      responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + answer;
+      input.value = '';
+      
+      delete window[callbackName];
+      delete window[summaryCallback];
+    };
+    
+    var summaryScript = document.createElement('script');
+    summaryScript.src = 'https://ru.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=extracts&exintro=1&explaintext=1&format=json&callback=' + summaryCallback;
+    document.body.appendChild(summaryScript);
+  };
+  
+  var searchScript = document.createElement('script');
+  searchScript.src = 'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(cleanedQuery) + '&format=json&callback=' + callbackName;
+  searchScript.onerror = function() {
+    delete window[callbackName];
+    if(searchScript) searchScript.remove();
+    searchFandom(rawQuery, responseDiv, input);
+  };
+  
+  document.body.appendChild(searchScript);
+}
+
+// --- ПРЯМОЙ ПОИСК В КОНКРЕТНОЙ FANDOM-ВИКИ ---
+function searchFandomSpecific(pageName, wikiName, rawQuery, responseDiv, input) {
+  responseDiv.innerHTML = '<span style="color:var(--dim)">ANOMALY.AI ищет в Fandom (' + wikiName + ')...</span>';
+  
+  var callbackName = 'fandomSpecific_' + Math.floor(Math.random() * 1000000);
+  
+  window[callbackName] = function(data) {
+    var answer = '';
+    var hasAnswer = false;
+    
+    if (data && data.query && data.query.pages) {
+      var pages = data.query.pages;
+      for (var pageId in pages) {
+        var page = pages[pageId];
+        if (page.extract) {
+          answer = '<b>ИЗ FANDOM (' + page.title + '):</b> ' + page.extract;
+          hasAnswer = true;
+          break;
+        }
+      }
+    }
+    
+    if (!hasAnswer) {
+      delete window[callbackName];
+      searchFandom(rawQuery, responseDiv, input);
+      return;
+    }
+    
+    responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + answer;
+    input.value = '';
+    delete window[callbackName];
+  };
+  
+  var script = document.createElement('script');
+  script.src = 'https://' + wikiName + '.fandom.com/ru/api.php?action=query&titles=' + encodeURIComponent(pageName) + '&prop=extracts&exintro=1&explaintext=1&format=json&callback=' + callbackName;
+  script.onerror = function() {
+    delete window[callbackName];
+    if(script) script.remove();
+    searchFandom(rawQuery, responseDiv, input);
+  };
+  
+  document.body.appendChild(script);
+}
+
+// --- ПОИСК В FANDOM (JSONP) ---
+function searchFandom(rawQuery, responseDiv, input) {
+  var cleanedQuery = rawQuery.toLowerCase()
+    .replace(/^(что такое|что это|кто такой|кто такая|кто такие|почему|зачем|как|где|когда)\s+/i, '')
+    .replace(/\?+$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  responseDiv.innerHTML = '<span style="color:var(--dim)">ANOMALY.AI ищет в Fandom: "' + cleanedQuery + '"...</span>';
+  
+  var callbackName = 'fandomSearch_' + Math.floor(Math.random() * 1000000);
+  
+  window[callbackName] = function(data) {
+    var answer = '';
+    var hasAnswer = false;
+    
+    if (data && data.query && data.query.search && data.query.search.length > 0) {
+      var firstResult = data.query.search[0];
+      var pageTitle = firstResult.title;
+      
+      var summaryCallback = 'fandomSummary_' + Math.floor(Math.random() * 1000000);
+      window[summaryCallback] = function(summaryData) {
+        if (summaryData && summaryData.query && summaryData.query.pages) {
+          var pages = summaryData.query.pages;
+          for (var pageId in pages) {
+            var page = pages[pageId];
+            if (page.extract) {
+              answer = '<b>ИЗ FANDOM (' + page.title + '):</b> ' + page.extract;
+              hasAnswer = true;
+              break;
+            }
+          }
+        }
+        
+        if (!hasAnswer) {
+          answer = 'Нашёл статью "' + pageTitle + '" в Fandom, но не смог загрузить описание.';
+        }
+        
+        responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + answer;
+        input.value = '';
+        
+        delete window[callbackName];
+        delete window[summaryCallback];
+      };
+      
+      var summaryScript = document.createElement('script');
+      summaryScript.src = 'https://community.fandom.com/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=extracts&exintro=1&explaintext=1&format=json&callback=' + summaryCallback;
+      document.body.appendChild(summaryScript);
+      
+    } else {
+      delete window[callbackName];
+      showGoogleFallback(rawQuery, responseDiv, input);
+    }
+  };
+  
+  var searchScript = document.createElement('script');
+  searchScript.src = 'https://community.fandom.com/api.php?action=query&list=search&srsearch=' + encodeURIComponent(cleanedQuery) + '&format=json&callback=' + callbackName;
+  searchScript.onerror = function() {
+    delete window[callbackName];
+    if(searchScript) searchScript.remove();
+    showGoogleFallback(rawQuery, responseDiv, input);
+  };
+  
+  document.body.appendChild(searchScript);
+}
+
+function showGoogleFallback(rawQuery, responseDiv, input) {
+  var answer = 'Я не нашёл информации ни в Википедии, ни в Fandom. Попробуй переформулировать.';
+  answer += '<br><br><span style="color:var(--amber);">Предлагаю открыть Google:</span><br><br>';
+  answer += '<a href="https://www.google.com/search?q=' + encodeURIComponent(rawQuery) + '" target="_blank" style="display:inline-block; padding:8px 15px; border:1px solid var(--green); color:var(--green); text-decoration:none; font-size:12px; background:rgba(140,255,156,0.05);">🔍 ОТКРЫТЬ В GOOGLE</a>';
+  
+  responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + answer;
+  input.value = '';
+}
+
+// --- ПЕРЕМЕЩЕНИЕ ИКОНОК ---
+var dragTarget = null;
+var dragStartX = 0, dragStartY = 0;
+var iconStartX = 0, iconStartY = 0;
+var hasMoved = false;
+
+function setupDragAndDrop(div, item) {
+  div.onmousedown = function(e) {
+    if(e.button !== 0) return;
+    e.preventDefault();
+    
+    dragTarget = div;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    iconStartX = item.x;
+    iconStartY = item.y;
+    hasMoved = false;
+    
+    div.style.zIndex = 1000;
+    div.style.opacity = '0.7';
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+  
+  function onMouseMove(e) {
+    if(!dragTarget) return;
+    var dx = e.clientX - dragStartX;
+    var dy = e.clientY - dragStartY;
+    
+    if(Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
+    
+    var newX = iconStartX + dx;
+    var newY = iconStartY + dy;
+    var maxX = desktopGrid.clientWidth - 110;
+    var maxY = desktopGrid.clientHeight - 110;
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+    
+    div.style.left = newX + 'px';
+    div.style.top = newY + 'px';
+  }
+  
+  function onMouseUp(e) {
+    if(!dragTarget) return;
+    
+    if(hasMoved) {
+      var dx = e.clientX - dragStartX;
+      var dy = e.clientY - dragStartY;
+      var newX = iconStartX + dx;
+      var newY = iconStartY + dy;
+      var maxX = desktopGrid.clientWidth - 110;
+      var maxY = desktopGrid.clientHeight - 110;
+      newX = Math.max(0, Math.min(newX, maxX));
+      newY = Math.max(0, Math.min(newY, maxY));
+      
+      item.x = newX;
+      item.y = newY;
+      saveAll();
+    }
+    
+    dragTarget.style.zIndex = '';
+    dragTarget.style.opacity = '1';
+    dragTarget = null;
+    
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+}
+
+// --- ОТРИСОВКА РАБОЧЕГО СТОЛА ---
+function renderDesktop() {
+  desktopGrid.innerHTML = '';
+  var currentFolder = getCurrentFolder();
+  var displayPath = "/home/desktop/" + currentPath.join('/');
+  pathEl.textContent = displayPath;
+  
+  pathNav.innerHTML = '';
+  var rootBtn = document.createElement('button');
+  rootBtn.className = 'path-btn';
+  rootBtn.textContent = '💻 Мой компьютер';
+  rootBtn.onclick = function() { currentPath = []; renderDesktop(); };
+  pathNav.appendChild(rootBtn);
+  
+  var accumPath = [];
+  currentPath.forEach(function(folderName) {
+    accumPath.push(folderName);
+    var pathToThis = accumPath.slice();
+    var btn = document.createElement('button');
+    btn.className = 'path-btn';
+    btn.innerHTML = '📁 ' + folderName;
+    btn.onclick = function() { currentPath = pathToThis; renderDesktop(); };
+    pathNav.appendChild(btn);
+  });
+
+  if(currentFolder.children) {
+    currentFolder.children.forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'desktop-icon';
+      
+      div.style.left = (item.x || 30) + 'px';
+      div.style.top = (item.y || 30) + 'px';
+      
+      var icon = document.createElement('div');
+      icon.className = 'icon-img';
+      if(item.isFolder) {
+        icon.textContent = item.isTrash ? '🗑️' : '📁';
+      } else if(item.isAI) {
+        icon.textContent = '🤖';
+      } else {
+        icon.textContent = '📄';
+      }
+      
+      var label = document.createElement('div');
+      label.className = 'icon-label';
+      label.textContent = item.name;
+      
+      div.appendChild(icon);
+      div.appendChild(label);
+      
+      setupDragAndDrop(div, item);
+      
+      div.ondblclick = function() {
+        if(hasMoved) return;
+        if(item.isFolder) {
+          currentPath.push(item.name);
+          renderDesktop();
+        } else {
+          openFile(item);
+        }
+      };
+      
+      div.oncontextmenu = function(e) {
+        e.preventDefault();
+        if(item.isTrash) {
+          if(confirm('Очистить корзину навсегда?')) {
+            item.children = [];
+            renderDesktop();
+            saveAll();
+          }
+          return;
+        }
+        
+        if(confirm('Переместить "' + item.name + '" в корзину?')) {
+          var trashFolder = treeData.children.find(function(c) { return c.isTrash; });
+          if(trashFolder) {
+            var idx = currentFolder.children.indexOf(item);
+            if(idx > -1) currentFolder.children.splice(idx, 1);
+            trashFolder.children.push(item);
+          }
+          renderDesktop();
+          saveAll();
+        }
+      };
+      
+      desktopGrid.appendChild(div);
+    });
+  }
+}
+
+// --- ОТКРЫТИЕ ФАЙЛА / ИИ ---
+function openFile(fileNode) {
+  activeFile = fileNode;
+  desktopView.style.display = 'none';
+  editorView.classList.add('active');
+  
+  var fullPath = "/home/desktop/" + currentPath.join('/') + '/' + fileNode.name;
+  editorPath.textContent = fullPath;
+  counter.textContent = 'FILE: ' + fileNode.name;
+  
+  if(fileNode.isAI) {
+    editorControls.style.display = 'none';
+    editorModeLabel.textContent = 'AI MODE';
+    footerNav.innerHTML = '<button onclick="document.getElementById(\'closeEditorBtn\').click()" type="button">[ ВЫЙТИ ]</button>';
+    content.contentEditable = 'false';
+    
+    var safeTitle = fileNode.name.replace(/</g, '&lt;');
+    var promptHtml = '<div class="system-prompt">anomaly@archive:~$ <span>./anomaly.ai --interactive</span></div>';
+    
+    content.innerHTML = promptHtml + fileNode.body;
+    
+    setTimeout(function() {
+      var aiInp = document.getElementById('aiInput');
+      if(aiInp) aiInp.focus();
+    }, 100);
+  } else {
+    editorControls.style.display = 'flex';
+    editorModeLabel.textContent = 'EDITOR';
+    footerNav.innerHTML = '<button id="saveBtn" type="button">[ СОХРАНИТЬ ]</button>';
+    content.contentEditable = 'true';
+    
+    var safeTitle = fileNode.name.replace(/</g, '&lt;');
+    var promptHtml = '<div class="system-prompt" contenteditable="false">user@archive:~$ <span>cat ' + safeTitle + '</span></div>';
+    
+    content.innerHTML = promptHtml + fileNode.body;
+    content.scrollTo({top:0,left:0,behavior:'instant'});
+    
+    document.getElementById('saveBtn').onclick = function() {
+      saveAll();
+      alert('Файл сохранен!');
+    };
+  }
+}
+
+document.getElementById('closeEditorBtn').onclick = function() {
+  if(!activeFile || !activeFile.isAI) {
+    saveAll();
+  }
+  editorView.classList.remove('active');
+  desktopView.style.display = 'flex';
+  activeFile = null;
+  content.contentEditable = 'true';
+  renderDesktop();
+};
+
+// --- СОЗДАНИЕ ---
+document.getElementById('addItemBtn').onclick = function() {
+  var currentFolder = getCurrentFolder();
+  var type = prompt('Что создать? (1 - Папка, 2 - Файл):', '1');
+  
+  if(type === '1') {
+    var name = prompt('Имя новой папки:', 'New_Folder');
+    if(name) {
+      var newX = 30 + Math.random() * 400;
+      var newY = 30 + Math.random() * 300;
+      currentFolder.children.push({ name: name, isFolder: true, children: [], x: newX, y: newY });
+      renderDesktop();
+      saveAll();
+    }
+  } else if(type === '2') {
+    var name = prompt('Имя нового файла:', 'note.txt');
+    if(name) {
+      var newX = 30 + Math.random() * 400;
+      var newY = 30 + Math.random() * 300;
+      currentFolder.children.push({
+        name: name,
+        isFolder: false,
+        body: '<h1>' + name.replace(/</g, '&lt;') + '</h1><div class="meta">NEW LOCAL DOCUMENT</div><div class="rule"></div><p>Начни писать здесь.</p><p style="color:var(--dim)">END OF FILE<span class="cursor"></span></p>',
+        x: newX,
+        y: newY
+      });
+      renderDesktop();
+      saveAll();
+    }
+  }
+};
+
+// --- НАСТРОЙКИ ТЕКСТА ---
+function applyTextSettings(){
+  textSize=Math.max(10,Math.min(30,textSize));
+  content.style.setProperty('--text-size',textSize+'px');
+  fontSizeLabel.textContent=textSize+'px';
+  saveAll();
+}
+
+document.getElementById('fontDown').onclick=function(e){e.preventDefault();textSize-=1;applyTextSettings();};
+document.getElementById('fontUp').onclick=function(e){e.preventDefault();textSize+=1;applyTextSettings();};
+
+textColorInput.addEventListener('input',function(e){
+  var color = e.target.value;
+  content.focus();
+  document.execCommand('foreColor', false, color);
+  saveAll();
+});
+
+function insertNode(html) {
+  content.focus();
+  document.execCommand('insertHTML', false, html);
+  saveAll();
+}
+
+document.getElementById('addH1').onclick=function(e){e.preventDefault();insertNode('<h1>Новый заголовок</h1>');};
+document.getElementById('addH2').onclick=function(e){e.preventDefault();insertNode('<h2>Новый подзаголовок</h2>');};
+
+document.getElementById('delH1').onclick=function(e){
+  e.preventDefault(); content.focus();
+  var sel = window.getSelection();
+  if (sel.rangeCount) {
+    var parent = sel.getRangeAt(0).startContainer.nodeType === 3 ? sel.getRangeAt(0).startContainer.parentNode : sel.getRangeAt(0).startContainer;
+    var h1 = parent.closest('h1');
+    if (h1) { h1.parentNode.removeChild(h1); saveAll(); } 
+  }
+};
+
+document.getElementById('delH2').onclick=function(e){
+  e.preventDefault(); content.focus();
+  var sel = window.getSelection();
+  if (sel.rangeCount) {
+    var parent = sel.getRangeAt(0).startContainer.nodeType === 3 ? sel.getRangeAt(0).startContainer.parentNode : sel.getRangeAt(0).startContainer;
+    var h2 = parent.closest('h2');
+    if (h2) { h2.parentNode.removeChild(h2); saveAll(); } 
+  }
+};
+
+var saveTimer=null;
+content.addEventListener('input',function(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveAll,300);
+});
+window.addEventListener('beforeunload',function(){clearTimeout(saveTimer);saveAll();});
+
+// --- АУДИО ---
+var audioCtx = null;
+var ambientStarted = false;
+
+function initAudio() {
+  if (!audioCtx) {
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function startAmbientSound() {
+  var ctx = initAudio();
+  if (ambientStarted) return; 
+  try {
+    var osc1 = ctx.createOscillator();
+    var osc2 = ctx.createOscillator();
+    var filter = ctx.createBiquadFilter();
+    var gainNode = ctx.createGain();
+    osc1.type = 'triangle'; osc1.frequency.value = 40; 
+    osc2.type = 'sine'; osc2.frequency.value = 60;
+    filter.type = 'lowpass'; filter.frequency.value = 100; 
+    gainNode.gain.value = 0.08; 
+    osc1.connect(filter); osc2.connect(filter);
+    filter.connect(gainNode); gainNode.connect(ctx.destination);
+    osc1.start(); osc2.start();
+    ambientStarted = true;
+  } catch(e) {}
+}
+
+function playClickSound() {
+  var ctx = initAudio();
+  if (!ctx) return;
+  try {
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1000, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.03);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.04);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.05);
+  } catch(e) {}
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.desktop-icon')) {
+    playClickSound();
+  }
+});
+
+// --- ВКЛЮЧЕНИЕ / ВЫКЛЮЧЕНИЕ ---
+var startScreen = document.getElementById('start-screen');
+var powerUI = document.getElementById('power-ui');
+var bootSeq = document.getElementById('boot-sequence');
+var app = document.getElementById('app');
+var crtOverlay = document.getElementById('crt-overlay');
+var crtLine = document.getElementById('crt-line');
+var flash = document.getElementById('screen-flash');
+
+document.getElementById('powerOnBtn').onclick = function() {
+  initAudio();
+  startAmbientSound();
+  
+  powerUI.style.display = 'none';
+  bootSeq.style.display = 'block';
+  bootSeq.innerHTML = '';
+  
+  var bootLines = [
+    "ARCHIVE BIOS v1.0",
+    "Memory Test: 640K OK",
+    "Detecting IDE drives...",
+    "Mounting file system... OK",
+    "Loading kernel... OK",
+    "Starting ARCHIVE_OS..."
+  ];
+  
+  var lineIndex = 0;
+  function showNextLine() {
+    if (lineIndex < bootLines.length) {
+      var line = document.createElement('div');
+      line.className = 'boot-line';
+      line.textContent = bootLines[lineIndex];
+      bootSeq.appendChild(line);
+      lineIndex++;
+      setTimeout(showNextLine, 400 + Math.random() * 300);
+    } else {
+      setTimeout(function() {
+        startScreen.style.display = 'none';
+        app.classList.add('on');
+        
+        crtOverlay.style.opacity = '1';
+        crtLine.style.animation = 'turnOn 0.6s ease-out forwards';
+        flash.style.animation = 'flash 0.6s ease-out';
+        
+        setTimeout(function() {
+          crtOverlay.style.opacity = '0';
+          crtLine.style.animation = '';
+          flash.style.animation = '';
+          crtOverlay.style.pointerEvents = 'none';
+          
+          currentPath = [];
+          renderDesktop();
+          desktopView.style.display = 'flex';
+          editorView.classList.remove('active');
+        }, 600);
+      }, 500);
+    }
+  }
+  showNextLine();
+};
+
+document.getElementById('powerOffBtn').onclick = function() {
+  saveAll();
+  crtOverlay.style.opacity = '1';
+  crtLine.style.animation = 'turnOff 0.6s ease-in forwards';
+  
+  setTimeout(function() {
+    app.classList.remove('on');
+    setTimeout(function(){
+       startScreen.style.display = 'flex';
+       powerUI.style.display = 'block';
+       bootSeq.style.display = 'none';
+       crtOverlay.style.opacity = '0';
+       crtLine.style.animation = '';
+       desktopGrid.innerHTML = '';
+       content.innerHTML = '';
+       activeFile = null;
+    }, 500);
+  }, 600);
+};
+</script>
+</body>
+</html>
