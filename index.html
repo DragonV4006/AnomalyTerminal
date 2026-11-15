@@ -2,11 +2,11 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Retro Terminal OS</title>
 <style>
 :root{--bg:#020603;--panel:#071008;--green:#8cff9c;--dim:#4e8c59;--line:#1c4b27;--bright:#c5ffd0;--amber:#d5c477}
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:"Cascadia Mono","Consolas","Courier New",monospace}
 
 /* --- АНИМАЦИИ МОНИТОРА --- */
@@ -32,7 +32,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:"Casc
 .power-btn:hover { background: var(--green); color: #000; box-shadow: 0 0 20px var(--green); }
 .power-btn:active { transform: scale(0.95); }
 
-#boot-sequence { display: none; color: var(--green); font-size: 14px; line-height: 1.8; text-align: left; width: 400px; position: relative; }
+#boot-sequence { display: none; color: var(--green); font-size: 14px; line-height: 1.8; text-align: left; width: 400px; max-width: 90vw; position: relative; }
 #boot-sequence .boot-line { opacity: 0; animation: fadeInLine 0.3s forwards; }
 @keyframes fadeInLine { to { opacity: 1; } }
 #boot-sequence .ok { color: var(--bright); }
@@ -149,6 +149,12 @@ body:after {
 .dots{display:flex;gap:6px}.dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--dim)}.dot:nth-child(2){border-color:var(--amber)}.dot:nth-child(3){border-color:var(--green)}
 #path{color:var(--green);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
 
+/* Кнопка мобильного меню */
+#mobileMenuBtn {
+  display: none; background: transparent; border: 1px solid var(--green);
+  color: var(--green); padding: 5px 10px; cursor: pointer; font-family: inherit; font-size: 16px;
+}
+
 .desktop { 
   position: relative; 
   overflow: hidden; 
@@ -166,31 +172,28 @@ body:after {
 .desktop-icon .icon-img { font-size: 40px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(140,255,156,0.3); }
 .desktop-icon .icon-label { font-size: 12px; color: var(--bright); word-break: break-word; }
 
-/* --- ИСПРАВЛЕННЫЙ РЕДАКТОР / ИИ-ИНТЕРФЕЙС --- */
+/* --- ИСПРАВЛЕННЫЙ РЕДАКТОР / ИИ-ИНТЕРФЕЙС (АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ) --- */
 .editor-view { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; background: rgba(3,10,5,0.98); z-index: 10; min-height: 0; overflow: hidden; }
 .editor-view.active { display: flex; }
 
-/* Обертка для чата и контента */
 .editor-main-wrap {
-  display: flex;
+  position: relative;
   flex: 1;
   min-height: 0;
   width: 100%;
   overflow: hidden;
 }
 
-/* Сам контент всегда зеленый */
 .content {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
   padding: 25px 34px 30px;
   overflow-y: auto;
   scroll-behavior: smooth;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  height: 100%;
+  color: var(--green) !important;
+  transition: left 0.3s ease;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  color: var(--green) !important;
 }
 .content::-webkit-scrollbar{width:7px}
 .content::-webkit-scrollbar-thumb{background:#205a2a}
@@ -209,20 +212,20 @@ body:after {
 
 .footer{border-top:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;color:var(--dim);font-size:11px;flex:0 0 auto; background: var(--panel);} 
 .nav button,.add{font:inherit;color:var(--green);background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}.nav button:hover,.add:hover{border-color:var(--green);color:var(--bright);box-shadow:0 0 8px rgba(140,255,156,.2)}
-.controls{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:16px}.controls button{font:inherit;font-size:11px;color:var(--green);background:transparent;border:1px solid var(--line);padding:3px 6px;cursor:pointer}.controls button:hover{border-color:var(--green);color:var(--bright)}.size-label{min-width:38px;text-align:center;color:var(--dim);font-size:10px}.color-picker{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:10px;margin-left:5px}.color-picker input{width:25px;height:20px;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer}
+.controls{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:16px;overflow-x:auto; scrollbar-width:none;}.controls::-webkit-scrollbar{display:none;}.controls button{font:inherit;font-size:11px;color:var(--green);background:transparent;border:1px solid var(--line);padding:3px 6px;cursor:pointer; white-space:nowrap;}.controls button:hover{border-color:var(--green);color:var(--bright)}.size-label{min-width:38px;text-align:center;color:var(--dim);font-size:10px}.color-picker{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:10px;margin-left:5px; white-space:nowrap;}.color-picker input{width:25px;height:20px;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer}
 
-/* --- ЧАТЫ В ИИ --- */
+/* --- ЧАТЫ В ИИ (АБСОЛЮТНЫЕ) --- */
 #chatListContainer {
-  display: none;
-  flex-direction: column;
-  flex: 0 0 200px;
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
   width: 200px;
   border-right: 1px solid var(--line);
   padding: 10px;
-  height: 100%;
-  min-height: 0;
   overflow-y: auto;
   background: rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+  z-index: 20;
 }
 #chatListContainer.active { display: flex; }
 .chat-item { padding: 8px; cursor: pointer; color: var(--dim); border: 1px solid transparent; margin-bottom: 5px; font-size: 12px; display: flex; justify-content: space-between; }
@@ -230,14 +233,12 @@ body:after {
 .chat-item .del-chat { color: #ff5555; cursor: pointer; font-weight: bold; padding: 0 5px; }
 .chat-item .del-chat:hover { color: #fff; }
 
-/* Сообщения чата */
 .chat-msg { margin-bottom: 15px; padding: 10px; border-left: 2px solid var(--line); background: rgba(255,255,255,0.02); color: var(--green); }
 .chat-msg.user { border-left-color: var(--green); }
 .chat-msg.bot { border-left-color: var(--amber); }
 .chat-msg .sender { font-size: 10px; color: var(--dim); margin-bottom: 5px; }
-.chat-msg div { color: var(--green); } /* Принудительный зеленый цвет для текста сообщения */
+.chat-msg div { color: var(--green); }
 
-/* Поле ввода чата */
 #inputContainer input {
   background: transparent !important;
   border: 1px solid var(--line) !important;
@@ -246,9 +247,7 @@ body:after {
   font-family: inherit;
   outline: none;
 }
-#inputContainer input:focus {
-  border-color: var(--green) !important;
-}
+#inputContainer input:focus { border-color: var(--green) !important; }
 #inputContainer button {
   background: transparent !important;
   border: 1px solid var(--green) !important;
@@ -257,16 +256,14 @@ body:after {
   cursor: pointer;
   font-family: inherit;
 }
-#inputContainer button:hover {
-  background: rgba(140,255,156,0.1) !important;
-}
+#inputContainer button:hover { background: rgba(140,255,156,0.1) !important; }
 
 /* --- ИГРОВОЕ ОКНО --- */
 #gamesView { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; background: rgba(3,10,5,0.98); z-index: 10; }
 #gamesView.active { display: flex; }
 #gamesView .game-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); }
 #gamesView .game-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-#gamesView canvas { background: #000; border: 1px solid var(--line); box-shadow: 0 0 20px rgba(140, 255, 156, 0.2); }
+#gamesView canvas { background: #000; border: 1px solid var(--line); box-shadow: 0 0 20px rgba(140, 255, 156, 0.2); max-width: 100%; max-height: 100%; object-fit: contain; }
 #gamesView .score { color: var(--amber); font-size: 18px; position: absolute; top: 20px; left: 20px; }
 #gamesView .game-over { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); color: #ff5555; font-size: 24px; z-index: 100; }
 
@@ -303,6 +300,78 @@ body:after {
 #glitchOverlay.active { display: block; }
 #glitchOverlay .glitch-line { position: absolute; left: 0; width: 100%; height: 4px; background: #ff0000; opacity: 0.6; animation: glitchMove 0.2s linear infinite; }
 @keyframes glitchMove { 0% { top: 0; } 100% { top: 100%; } }
+
+/* --- МОБИЛЬНАЯ АДАПТАЦИЯ --- */
+@media(max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr;
+    padding: 8px;
+    position: relative;
+  }
+  .sidebar {
+    position: absolute;
+    top: 8px; left: 8px; bottom: 8px;
+    width: 260px;
+    z-index: 1000;
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+    background: rgba(3,10,5,0.98);
+    border: 1px solid var(--line);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  #mobileMenuBtn {
+    display: block;
+  }
+  .topbar {
+    padding: 0 10px;
+    gap: 5px;
+  }
+  #path, #editorPath {
+    max-width: 120px;
+    font-size: 10px;
+  }
+  .controls {
+    margin-right: 0;
+    margin-left: 0;
+  }
+  .content {
+    padding: 15px 12px;
+    font-size: 13px;
+  }
+  .content h1 { font-size: 24px; }
+  .content h2 { font-size: 16px; }
+  /* Чат на телефоне открывается поверх контента */
+  #chatListContainer {
+    width: 85vw;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+  }
+  .chat-msg { padding: 8px; font-size: 13px; }
+  #inputContainer {
+    flex-direction: column;
+    gap: 5px;
+  }
+  #inputContainer button {
+    width: 100%;
+  }
+  .footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .footer .nav {
+    width: 100%;
+  }
+  .footer .nav button {
+    width: 100%;
+    padding: 10px;
+  }
+  .quest-slots span { width: 30px; font-size: 24px; }
+  #gamesView .game-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+  #gamesView canvas { max-width: 90vw; max-height: 60vh; }
+}
 </style>
 </head>
 <body>
@@ -329,7 +398,7 @@ body:after {
 <div id="crt-overlay"><div id="crt-line"></div></div>
 
 <div class="app" id="app">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">/ / ARCHIVE_OS</div>
     <div class="status">LOCAL SESSION<br>STATUS: <span style="color:var(--green)">ONLINE</span></div>
     <div class="path-nav" id="pathNav"></div>
@@ -342,7 +411,10 @@ body:after {
   <main class="terminal">
     <div id="desktopView" style="display:flex; flex-direction:column; height:100%; width:100%;">
       <div class="topbar">
-        <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="mobileMenuBtn" style="display:none;">☰</button>
+          <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        </div>
         <div id="path">/home/desktop</div>
         <div>TTY: 01</div>
       </div>
@@ -351,7 +423,10 @@ body:after {
 
     <div id="editorView" class="editor-view">
       <div class="topbar">
-        <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="mobileMenuBtnEditor" style="display:none;">☰</button>
+          <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+        </div>
         <div id="editorPath">/home/desktop/file.txt</div>
         <div class="controls" id="editorControls">
           <button id="closeEditorBtn" style="color:#ff5555; border-color:#ff5555; margin-right:10px;">[ ЗАКРЫТЬ ]</button>
@@ -368,8 +443,12 @@ body:after {
         <div id="editorModeLabel">EDITOR</div>
       </div>
       
-      <div class="editor-main-wrap">
+      <div class="editor-main-wrap" id="editorMainWrap">
         <div id="chatListContainer">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid var(--line); padding-bottom:5px;">
+            <span style="font-size:12px; color:var(--bright);">ЧАТЫ ИИ</span>
+            <button id="closeChatListBtn" style="background:none; border:none; color:#ff5555; cursor:pointer; font-size:16px; display:none;">×</button>
+          </div>
           <button class="quest-btn" id="newChatBtn" style="width:100%; margin-bottom:10px; padding:5px;">+ NEW CHAT</button>
           <div id="chatList"></div>
         </div>
@@ -467,6 +546,36 @@ body:after {
     container.appendChild(p);
   }
 })();
+
+// --- МОБИЛЬНОЕ МЕНЮ ---
+var sidebar = document.getElementById('sidebar');
+var mobileMenuBtn = document.getElementById('mobileMenuBtn');
+var mobileMenuBtnEditor = document.getElementById('mobileMenuBtnEditor');
+
+function checkMobile() {
+  if (window.innerWidth <= 768) {
+    mobileMenuBtn.style.display = 'block';
+    mobileMenuBtnEditor.style.display = 'block';
+  } else {
+    mobileMenuBtn.style.display = 'none';
+    mobileMenuBtnEditor.style.display = 'none';
+    sidebar.classList.remove('open');
+  }
+}
+window.addEventListener('resize', checkMobile);
+checkMobile();
+
+mobileMenuBtn.onclick = function() { sidebar.classList.toggle('open'); };
+mobileMenuBtnEditor.onclick = function() { sidebar.classList.toggle('open'); };
+
+// Закрытие меню при клике вне его (на мобилке)
+document.addEventListener('click', function(e) {
+  if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+    if (!sidebar.contains(e.target) && e.target !== mobileMenuBtn && e.target !== mobileMenuBtnEditor) {
+      sidebar.classList.remove('open');
+    }
+  }
+});
 
 // --- СИСТЕМА ЧАТОВ ---
 var chatHistory = [];
@@ -1310,7 +1419,7 @@ function renderDesktop() {
   var rootBtn = document.createElement('button');
   rootBtn.className = 'path-btn';
   rootBtn.textContent = '💻 Мой компьютер';
-  rootBtn.onclick = function() { currentPath = []; renderDesktop(); };
+  rootBtn.onclick = function() { currentPath = []; renderDesktop(); sidebar.classList.remove('open'); };
   pathNav.appendChild(rootBtn);
 
   var accumPath = [];
@@ -1320,7 +1429,7 @@ function renderDesktop() {
     var btn = document.createElement('button');
     btn.className = 'path-btn';
     btn.innerHTML = '📁 ' + folderName;
-    btn.onclick = function() { currentPath = pathToThis; renderDesktop(); };
+    btn.onclick = function() { currentPath = pathToThis; renderDesktop(); sidebar.classList.remove('open'); };
     pathNav.appendChild(btn);
   });
 
@@ -1347,6 +1456,20 @@ function renderDesktop() {
         if(item.isGames) { openGames(); }
         else if(item.isFolder) { currentPath.push(item.name); renderDesktop(); }
         else { openFile(item); }
+      };
+
+      // Поддержка двойного тапа для телефона
+      var lastTap = 0;
+      div.ontouchstart = function(e) {
+        var currentTime = new Date().getTime();
+        var tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+          e.preventDefault();
+          if(item.isGames) { openGames(); }
+          else if(item.isFolder) { currentPath.push(item.name); renderDesktop(); }
+          else { openFile(item); }
+        }
+        lastTap = currentTime;
       };
       
       div.oncontextmenu = function(e) {
@@ -1409,6 +1532,16 @@ function openFile(fileNode) {
     content.contentEditable = 'false';
     
     document.getElementById('chatListContainer').classList.add('active');
+    
+    // На мобильных список чатов выезжает справа (сдвигаем контент)
+    if (window.innerWidth <= 768) {
+      content.style.left = '0';
+      document.getElementById('closeChatListBtn').style.display = 'block';
+    } else {
+      content.style.left = '200px';
+      document.getElementById('closeChatListBtn').style.display = 'none';
+    }
+
     loadChats();
     renderChatMessages();
     
@@ -1417,6 +1550,7 @@ function openFile(fileNode) {
       if(aiInp) aiInp.focus();
     }, 100);
   } else {
+    content.style.left = '0'; // Сброс для обычного текста
     document.getElementById('chatListContainer').classList.remove('active');
     editorControls.style.display = 'flex';
     editorModeLabel.textContent = 'EDITOR';
@@ -1456,6 +1590,7 @@ document.getElementById('addItemBtn').onclick = function() {
       currentFolder.children.push({ name: name, isFolder: true, children: [], x: 30 + Math.random() * 400, y: 30 + Math.random() * 300 });
       renderDesktop();
       saveAll();
+      sidebar.classList.remove('open'); // Закрываем меню на мобилке
     }
   } else if(type === '2') {
     var name = prompt('Имя нового файла:', 'note.txt');
@@ -1469,6 +1604,7 @@ document.getElementById('addItemBtn').onclick = function() {
       });
       renderDesktop();
       saveAll();
+      sidebar.classList.remove('open'); // Закрываем меню на мобилке
     }
   }
 };
@@ -1691,6 +1827,20 @@ document.getElementById('startSnakeBtn').onclick = startSnake;
 document.getElementById('startTetrisBtn').onclick = startTetris;
 document.getElementById('backToMenuBtn').onclick = backToGameMenu;
 document.getElementById('newChatBtn').onclick = function() { createNewChat(); };
+
+// Кнопка закрытия списка чатов на мобильном
+document.getElementById('closeChatListBtn').onclick = function() {
+  document.getElementById('chatListContainer').classList.remove('active');
+  content.style.left = '0';
+};
+
+// Закрытие списка чатов по клику на контент на мобильном
+content.addEventListener('click', function() {
+  if (window.innerWidth <= 768 && document.getElementById('chatListContainer').classList.contains('active')) {
+    document.getElementById('chatListContainer').classList.remove('active');
+    content.style.left = '0';
+  }
+});
 </script>
 </body>
 </html>
