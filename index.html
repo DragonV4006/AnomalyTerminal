@@ -458,8 +458,11 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
   border-right: 1px solid var(--line);
   padding: 10px;
   height: 100%;
+  max-height: 100%;
   overflow-y: auto;
   background: rgba(0,0,0,0.3);
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 #chatListContainer.active {
   display: flex;
@@ -603,14 +606,14 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
         <div id="editorModeLabel">EDITOR</div>
       </div>
       
-      <div style="display:flex; height:100%; width:100%;">
+      <div style="display:flex; height:100%; width:100%; min-height:0; overflow:hidden;">
         <!-- Список чатов (для ИИ) -->
         <div id="chatListContainer">
           <button class="quest-btn" onclick="createNewChat()" style="width:100%; margin-bottom:10px; padding:5px;">+ NEW CHAT</button>
           <div id="chatList"></div>
         </div>
 
-        <article class="content" id="content" tabindex="0" contenteditable="true" spellcheck="false" style="flex:1; position:relative;"></article>
+        <article class="content" id="content" tabindex="0" contenteditable="true" spellcheck="false" style="flex:1; position:relative; min-height:0;"></article>
       </div>
       
       <div class="footer">
@@ -789,12 +792,10 @@ function renderChatMessages() {
   var contentEl = document.getElementById('content');
   if (!contentEl) return;
   
-  // Очищаем всё, кроме поля ввода
   var inputContainer = document.getElementById('inputContainer');
   
   contentEl.innerHTML = '';
   
-  // Восстанавливаем сообщения
   chat.messages.forEach(function(msg) {
     var div = document.createElement('div');
     div.className = 'chat-msg ' + msg.role;
@@ -802,7 +803,6 @@ function renderChatMessages() {
     contentEl.appendChild(div);
   });
   
-  // Создаём контейнер для ввода, если его нет
   if (!inputContainer) {
     inputContainer = document.createElement('div');
     inputContainer.id = 'inputContainer';
@@ -813,7 +813,6 @@ function renderChatMessages() {
   }
   contentEl.appendChild(inputContainer);
   
-  // Прокрутка вниз
   contentEl.scrollTop = contentEl.scrollHeight;
 }
 
@@ -936,28 +935,22 @@ var editorModeLabel = document.getElementById('editorModeLabel');
 var footerNav = document.getElementById('footerNav');
 var textSize = parseInt(localStorage.getItem('retroTerminalFontSize'),10)||14;
 
-// Контекст диалога
 var lastBotQuestion = null;
 var pendingFileSearch = null;
 
-// Секретные ответы для квеста
 var secretAnswers = {
   "как тебя звали раньше": "Я... я не помню. Но в моей памяти осталась цифра. Это **4**. Запомни её. Уходи.",
   "почему ты один": "Я не один. Ты здесь. Но раньше... раньше нас было двое. И цифра была **7**. Теперь ты знаешь слишком много.",
   "что случилось с предыдущим пользователем": "Он... он нашёл код. Но не успел его использовать. Третья цифра — **2**. Это последнее, что я тебе скажу."
 };
 
-// Полученные цифры (для квеста)
 var questDigits = {
   digit1: null,
   digit2: null,
   digit3: null
 };
 
-// Правильный код (можно поменять)
 var correctCode = "472";
-
-// Код возрождения (можно поменять)
 var reviveCode = "REVIVE-325V-X4X";
 
 function saveAll(){
@@ -983,7 +976,6 @@ function getCurrentFolder() {
   return current;
 }
 
-// --- ВСТРОЕННЫЙ КАЛЬКУЛЯТОР (с поддержкой степеней, корня, модуля) ---
 function tryCalculate(query) {
   var clean = query.replace(/\s+/g, '');
   clean = clean.replace(/\^/g, '**');
@@ -1000,7 +992,6 @@ function tryCalculate(query) {
   return null;
 }
 
-// --- ПОИСК ФАЙЛОВ В ДЕРЕВЕ ---
 function findFilesByName(query) {
   var results = [];
   var lowerQuery = query.toLowerCase().trim();
@@ -1031,14 +1022,12 @@ function findFilesByName(query) {
   return results;
 }
 
-// --- ОЧИСТКА HTML ДЛЯ ПЕРЕСКАЗА ---
 function stripHtml(html) {
   var tmp = document.createElement('div');
   tmp.innerHTML = html;
   return tmp.textContent || tmp.innerText || '';
 }
 
-// --- ОБРАБОТКА ЗАПРОСА "ПЕРЕСКАЖИ ФАЙЛ" ---
 function handleFileReadRequest(rawQuery) {
   var readPatterns = /(перескажи|расскажи|что\s+в|что\s+написано|прочитай|открой|покажи)\s+(файл\s+)?(.+)/i;
   var match = rawQuery.match(readPatterns);
@@ -1076,7 +1065,6 @@ function handleFileReadRequest(rawQuery) {
   return true;
 }
 
-// --- ПРОВЕРКА НА ВЫБОР ФАЙЛА ИЗ СПИСКА ---
 function handlePendingFileSelection(rawQuery) {
   if (!pendingFileSearch) return false;
   
@@ -1103,8 +1091,6 @@ function handlePendingFileSelection(rawQuery) {
   addChatMessage('bot', 'Я не вижу такого пути. Ты уверен, что он существует?');
   return true;
 }
-
-// --- СЛОВАРИ ОТВЕТОВ (ХОРРОР) ---
 
 var DIRECT_RESPONSES = {
   "привет": {text: "Я слышу тебя. Ты пришёл. Они всегда приходят.", followUp: "how_are_you"},
@@ -1517,7 +1503,6 @@ var FOLLOW_UP_QUESTIONS = {
   "ask_lua": "Lua для Роблокса или чего-то другого?"
 };
 
-// --- ФУНКЦИЯ ПОЛУЧЕНИЯ ОТВЕТА С УЧЁТОМ КОНТЕКСТА ---
 function getSmartResponse(query) {
   var q = query.toLowerCase().trim().replace(/[!?.,]/g, '');
   
@@ -1568,7 +1553,6 @@ function getSmartResponse(query) {
   return null;
 }
 
-// --- БЕСПЛАТНЫЙ ИИ (Pollinations.ai) ---
 async function askPollinations(prompt) {
   var url = 'https://text.pollinations.ai/' + encodeURIComponent(prompt) + '?model=openai';
   try {
@@ -1582,7 +1566,6 @@ async function askPollinations(prompt) {
   }
 }
 
-// --- ГЛАВНАЯ ФУНКЦИЯ ---
 async function askAnomaly() {
   var input = document.getElementById('aiInput');
   if(!input) return;
@@ -1590,14 +1573,12 @@ async function askAnomaly() {
   var rawQuery = input.value.trim();
   if(!rawQuery) return;
   
-  // СЕКРЕТНАЯ КОМАНДА
   if (rawQuery === '/access_325V') {
     input.value = '';
     document.getElementById('secretArchive').classList.add('active');
     return;
   }
   
-  // ПРОВЕРКА НА СЕКРЕТНЫЕ ВОПРОСЫ КВЕСТА
   var lowerQuery = rawQuery.toLowerCase();
   for (var key in secretAnswers) {
     if (lowerQuery.indexOf(key) !== -1) {
@@ -1608,19 +1589,12 @@ async function askAnomaly() {
     }
   }
   
-  // Добавляем сообщение пользователя
   addChatMessage('user', rawQuery);
   input.value = '';
   
-  if (handlePendingFileSelection(rawQuery)) {
-    return;
-  }
+  if (handlePendingFileSelection(rawQuery)) return;
+  if (handleFileReadRequest(rawQuery)) return;
   
-  if (handleFileReadRequest(rawQuery)) {
-    return;
-  }
-  
-  // 1. ПЫТАЕМСЯ ПОЛУЧИТЬ ОТВЕТ ОТ ВНЕШНЕГО ИИ
   var aiAnswer = await askPollinations(rawQuery);
   
   if (aiAnswer !== null) {
@@ -1628,7 +1602,6 @@ async function askAnomaly() {
     return;
   }
   
-  // 2. ЕСЛИ ВНЕШНИЙ ИИ НЕ СМОГ — ИСПОЛЬЗУЕМ ЛОКАЛЬНУЮ ЛОГИКУ
   var smartResp = getSmartResponse(rawQuery);
   if (smartResp) {
     var fullAnswer = smartResp.text;
@@ -1653,26 +1626,22 @@ async function askAnomaly() {
   searchWikipedia(rawQuery);
 }
 
-// --- ЗАКРЫТИЕ СЕКРЕТНОГО АРХИВА ---
 function closeSecretArchive() {
   document.getElementById('secretArchive').classList.remove('active');
   closeQuartzDisk();
 }
 
-// --- ОТКРЫТИЕ КВАРЦЕВОГО ДИСКА ---
 function openQuartzDisk() {
   document.getElementById('archiveContent').style.display = 'none';
   document.getElementById('archiveFileView').classList.add('active');
   updateQuestSlots();
 }
 
-// --- ЗАКРЫТИЕ КВАРЦЕВОГО ДИСКА ---
 function closeQuartzDisk() {
   document.getElementById('archiveFileView').classList.remove('active');
   document.getElementById('archiveContent').style.display = 'flex';
 }
 
-// --- ОБНОВЛЕНИЕ СЛОТОВ КВЕСТА ---
 function updateQuestSlots() {
   var slot1 = document.getElementById('slot1');
   var slot2 = document.getElementById('slot2');
@@ -1685,7 +1654,6 @@ function updateQuestSlots() {
   }
 }
 
-// --- ПРОВЕРКА КОДА КВЕСТА ---
 function submitQuestCode() {
   var input = document.getElementById('questInput');
   var resultDiv = document.getElementById('questResult');
@@ -1707,58 +1675,47 @@ function submitQuestCode() {
   }
 }
 
-// --- ГЛИТЧ-ТРИГГЕР ПРИ 2000 ОЧКОВ ---
 var glitchTriggered = false;
 function triggerGlitchEvent() {
   if (glitchTriggered) return;
   glitchTriggered = true;
   
-  // Останавливаем игру
   stopGame();
   
-  // Включаем глитч-оверлей
   document.getElementById('glitchOverlay').classList.add('active');
-  
-  // Включаем глитч-фон терминала
   document.body.classList.add('glitch-mode');
   
-  // Воспроизводим 8-битную нагнетающую музыку
   start8BitMusic();
   
-  // Через 3.5 секунды убираем помехи и продолжаем игру
   setTimeout(function() {
     document.getElementById('glitchOverlay').classList.remove('active');
-    // Игра не продолжается автоматически, игрок должен нажать в меню.
-    // Но фон остаётся красным.
   }, 3500);
 }
 
-// --- 8-БИТНАЯ НАГНЕТАЮЩАЯ МУЗЫКА ---
 function start8BitMusic() {
   var ctx = initAudio();
   if (!ctx) return;
   
   try {
-    // Создаём последовательность нот (тревожные, низкие)
     var notes = [
-      { freq: 110, time: 0.0, dur: 0.15 }, // A2
-      { freq: 130, time: 0.15, dur: 0.15 }, // C3
-      { freq: 146, time: 0.3, dur: 0.15 }, // D3
-      { freq: 110, time: 0.45, dur: 0.15 }, // A2
-      { freq: 130, time: 0.6, dur: 0.15 }, // C3
-      { freq: 146, time: 0.75, dur: 0.15 }, // D3
-      { freq: 110, time: 0.9, dur: 0.3 }, // A2
-      { freq: 98, time: 1.2, dur: 0.15 }, // G2
-      { freq: 87, time: 1.35, dur: 0.15 }, // F2
-      { freq: 98, time: 1.5, dur: 0.15 }, // G2
-      { freq: 110, time: 1.65, dur: 0.3 }, // A2
-      { freq: 146, time: 1.95, dur: 0.15 }, // D3
-      { freq: 130, time: 2.1, dur: 0.15 }, // C3
-      { freq: 110, time: 2.25, dur: 0.3 }, // A2
-      { freq: 98, time: 2.55, dur: 0.15 }, // G2
-      { freq: 87, time: 2.7, dur: 0.15 }, // F2
-      { freq: 98, time: 2.85, dur: 0.15 }, // G2
-      { freq: 110, time: 3.0, dur: 0.5 }  // A2
+      { freq: 110, time: 0.0, dur: 0.15 },
+      { freq: 130, time: 0.15, dur: 0.15 },
+      { freq: 146, time: 0.3, dur: 0.15 },
+      { freq: 110, time: 0.45, dur: 0.15 },
+      { freq: 130, time: 0.6, dur: 0.15 },
+      { freq: 146, time: 0.75, dur: 0.15 },
+      { freq: 110, time: 0.9, dur: 0.3 },
+      { freq: 98, time: 1.2, dur: 0.15 },
+      { freq: 87, time: 1.35, dur: 0.15 },
+      { freq: 98, time: 1.5, dur: 0.15 },
+      { freq: 110, time: 1.65, dur: 0.3 },
+      { freq: 146, time: 1.95, dur: 0.15 },
+      { freq: 130, time: 2.1, dur: 0.15 },
+      { freq: 110, time: 2.25, dur: 0.3 },
+      { freq: 98, time: 2.55, dur: 0.15 },
+      { freq: 87, time: 2.7, dur: 0.15 },
+      { freq: 98, time: 2.85, dur: 0.15 },
+      { freq: 110, time: 3.0, dur: 0.5 }
     ];
     
     var gainMaster = ctx.createGain();
@@ -1769,7 +1726,7 @@ function start8BitMusic() {
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
       
-      osc.type = 'square'; // 8-битный звук
+      osc.type = 'square';
       osc.frequency.value = note.freq;
       
       gain.gain.setValueAtTime(0.0, ctx.currentTime + note.time);
@@ -1785,7 +1742,6 @@ function start8BitMusic() {
   } catch(e) {}
 }
 
-// --- ОТКРЫТИЕ ИГР ---
 function openGames() {
   desktopView.style.display = 'none';
   editorView.classList.remove('active');
@@ -1799,7 +1755,6 @@ function closeGamesView() {
   desktopView.style.display = 'flex';
 }
 
-// --- ИГРОВОЙ ДВИЖОК ---
 var gameInterval = null;
 var currentGame = null;
 var score = 0;
@@ -1825,7 +1780,6 @@ function backToGameMenu() {
   if (gameOverEl) gameOverEl.style.display = 'none';
 }
 
-// --- ЗМЕЙКА ---
 var snake = [];
 var food = { x: 0, y: 0 };
 var snakeDir = { x: 1, y: 0 };
@@ -1840,7 +1794,7 @@ function startSnake() {
   gameOverEl.style.display = 'none';
   gameScoreEl.textContent = '0';
   score = 0;
-  glitchTriggered = false; // Сброс триггера для новой игры
+  glitchTriggered = false;
   currentGame = 'snake';
   
   snake = [{ x: 10, y: 10 }];
@@ -1914,7 +1868,6 @@ function gameOverSnake() {
   gameOverEl.style.display = 'flex';
 }
 
-// --- ТЕТРИС ---
 var tetrisField = [];
 var tetrisCols = 10;
 var tetrisRows = 20;
@@ -1929,7 +1882,7 @@ function startTetris() {
   gameOverEl.style.display = 'none';
   gameScoreEl.textContent = '0';
   score = 0;
-  glitchTriggered = false; // Сброс триггера для новой игры
+  glitchTriggered = false;
   currentGame = 'tetris';
   
   tetrisField = [];
@@ -2068,7 +2021,6 @@ function gameOverTetris() {
   gameOverEl.style.display = 'flex';
 }
 
-// --- УПРАВЛЕНИЕ ---
 document.addEventListener('keydown', function(e) {
   if (!currentGame) return;
   
@@ -2105,7 +2057,6 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// --- ПОИСК В ВИКИПЕДИИ (с фолбэком в Fandom) ---
 function searchWikipedia(rawQuery) {
   var cleanedQuery = rawQuery.toLowerCase()
     .replace(/^(что такое|что это|кто такой|кто такая|кто такие|почему|зачем|как|где|когда)\s+/i, '')
@@ -2187,7 +2138,6 @@ function searchWikipedia(rawQuery) {
   document.body.appendChild(searchScript);
 }
 
-// --- ПРЯМОЙ ПОИСК В КОНКРЕТНОЙ FANDOM-ВИКИ ---
 function searchFandomSpecific(pageName, wikiName, rawQuery) {
   var callbackName = 'fandomSpecific_' + Math.floor(Math.random() * 1000000);
   
@@ -2228,7 +2178,6 @@ function searchFandomSpecific(pageName, wikiName, rawQuery) {
   document.body.appendChild(script);
 }
 
-// --- ПОИСК В FANDOM (JSONP) ---
 function searchFandom(rawQuery) {
   var cleanedQuery = rawQuery.toLowerCase()
     .replace(/^(что такое|что это|кто такой|кто такая|кто такие|почему|зачем|как|где|когда)\s+/i, '')
@@ -2299,7 +2248,6 @@ function showGoogleFallback(rawQuery) {
   addChatMessage('bot', answer);
 }
 
-// --- ПЕРЕМЕЩЕНИЕ ИКОНОК ---
 var dragTarget = null;
 var dragStartX = 0, dragStartY = 0;
 var iconStartX = 0, iconStartY = 0;
@@ -2369,7 +2317,6 @@ function setupDragAndDrop(div, item) {
   }
 }
 
-// --- ОТРИСОВКА РАБОЧЕГО СТОЛА ---
 function renderDesktop() {
   desktopGrid.innerHTML = '';
   var currentFolder = getCurrentFolder();
@@ -2479,7 +2426,6 @@ function renderDesktop() {
   }
 }
 
-// --- ОТКРЫТИЕ ФАЙЛА / ИИ ---
 function openFile(fileNode) {
   activeFile = fileNode;
   desktopView.style.display = 'none';
@@ -2500,7 +2446,6 @@ function openFile(fileNode) {
     
     content.innerHTML = promptHtml + fileNode.body;
     
-    // Открываем список чатов
     document.getElementById('chatListContainer').classList.add('active');
     loadChats();
     renderChatMessages();
@@ -2541,7 +2486,6 @@ document.getElementById('closeEditorBtn').onclick = function() {
   renderDesktop();
 };
 
-// --- СОЗДАНИЕ ---
 document.getElementById('addItemBtn').onclick = function() {
   var currentFolder = getCurrentFolder();
   var type = prompt('Что создать? (1 - Папка, 2 - Файл):', '1');
@@ -2573,7 +2517,6 @@ document.getElementById('addItemBtn').onclick = function() {
   }
 };
 
-// --- НАСТРОЙКИ ТЕКСТА ---
 function applyTextSettings(){
   textSize=Math.max(10,Math.min(30,textSize));
   content.style.setProperty('--text-size',textSize+'px');
@@ -2627,7 +2570,6 @@ content.addEventListener('input',function(){
 });
 window.addEventListener('beforeunload',function(){clearTimeout(saveTimer);saveAll();});
 
-// --- АУДИО ---
 var audioCtx = null;
 var ambientStarted = false;
 
@@ -2681,7 +2623,6 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// --- ВКЛЮЧЕНИЕ / ВЫКЛЮЧЕНИЕ ---
 var startScreen = document.getElementById('start-screen');
 var powerUI = document.getElementById('power-ui');
 var bootSeq = document.getElementById('boot-sequence');
