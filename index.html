@@ -11,6 +11,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:"Casc
 
 /* --- АНИМАЦИИ МОНИТОРА --- */
 #screen-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 10000; }
+@keyframes flash { 0%{opacity:0} 30%{opacity:0.8} 100%{opacity:0} }
 #crt-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; opacity: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
 #crt-line { width: 100%; height: 2px; background: #fff; opacity: 0; box-shadow: 0 0 15px #fff; }
 
@@ -74,17 +75,11 @@ html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:"Casc
 }
 .app.on { opacity: 1; pointer-events: auto; }
 
-/* ГЛИТЧ-ФОН */
 body.glitch-mode .app {
   background: 
     radial-gradient(circle at 15% 20%, rgba(150, 0, 0, 0.4) 0%, transparent 40%),
     radial-gradient(circle at 85% 80%, rgba(100, 0, 0, 0.3) 0%, transparent 45%),
     radial-gradient(ellipse at 48% 42%, #2a0000 0, #0a0000 62%, #000 100%) !important;
-}
-body.glitch-mode body:before {
-  background: 
-    repeating-linear-gradient(to bottom, rgba(255,0,0,.05) 0, rgba(255,0,0,.05) 1px, transparent 1px, transparent 4px),
-    repeating-linear-gradient(to right, rgba(255,0,0,0.03) 0, rgba(255,0,0,0.03) 1px, transparent 1px, transparent 60px) !important;
 }
 body.glitch-mode .sidebar,
 body.glitch-mode .terminal {
@@ -104,13 +99,7 @@ body.glitch-mode .desktop {
     radial-gradient(circle at 50% 50%, rgba(100, 0, 0, 0.3) 0%, transparent 70%),
     linear-gradient(135deg, rgba(20, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.95) 100%) !important;
 }
-body.glitch-mode .desktop-icon:hover {
-  background: rgba(255, 0, 0, 0.15) !important;
-  border-color: #ff2222 !important;
-  box-shadow: 0 0 15px rgba(255,0,0,0.3) !important;
-}
 
-/* CRT-эффект с сеткой и сканлайнами */
 body:before {
   content:"";
   position:fixed;
@@ -132,27 +121,8 @@ body:after {
   z-index:6;
 }
 
-/* Плавающие частицы */
-.particles {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-.particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: rgba(140, 255, 156, 0.4);
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(140, 255, 156, 0.6);
-  animation: float linear infinite;
-}
-body.glitch-mode .particle {
-  background: rgba(255, 50, 50, 0.6) !important;
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.8) !important;
-}
+.particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.particle { position: absolute; width: 2px; height: 2px; background: rgba(140, 255, 156, 0.4); border-radius: 50%; box-shadow: 0 0 6px rgba(140, 255, 156, 0.6); animation: float linear infinite; }
 @keyframes float {
   0% { transform: translateY(100vh) translateX(0); opacity: 0; }
   10% { opacity: 1; }
@@ -175,7 +145,6 @@ body.glitch-mode .particle {
 .power-off-btn { display: block; width: 100%; margin-top: 10px; background: transparent; border: 1px solid #ff5555; color: #ff5555; padding: 8px; font-family: inherit; cursor: pointer; text-transform: uppercase; font-size: 11px; letter-spacing: 1px;}
 .power-off-btn:hover { background: #ff5555; color: #000; box-shadow: 0 0 10px #ff5555; }
 
-/* --- РАБОЧИЙ СТОЛ --- */
 .topbar{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:var(--dim);font-size:11px;flex:0 0 auto; gap: 10px; background: rgba(3,10,5,0.5);}
 .dots{display:flex;gap:6px}.dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--dim)}.dot:nth-child(2){border-color:var(--amber)}.dot:nth-child(3){border-color:var(--green)}
 #path{color:var(--green);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
@@ -190,7 +159,6 @@ body.glitch-mode .particle {
     radial-gradient(circle at 50% 50%, rgba(20, 90, 40, 0.15) 0%, transparent 70%),
     linear-gradient(135deg, rgba(5, 20, 10, 0.6) 0%, rgba(0, 0, 0, 0.9) 100%);
 }
-.desktop::-webkit-scrollbar{width:7px}.desktop::-webkit-scrollbar-thumb{background:#205a2a}
 
 .desktop-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: grab; padding: 10px; border: 1px solid transparent; user-select: none; position: absolute; width: 100px; text-align: center; border-radius: 4px;}
 .desktop-icon:active { cursor: grabbing; }
@@ -198,10 +166,20 @@ body.glitch-mode .particle {
 .desktop-icon .icon-img { font-size: 40px; margin-bottom: 8px; text-shadow: 0 0 10px rgba(140,255,156,0.3); }
 .desktop-icon .icon-label { font-size: 12px; color: var(--bright); word-break: break-word; }
 
-/* --- РЕДАКТОР / ИИ-ИНТЕРФЕЙС --- */
-.editor-view { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; background: rgba(3,10,5,0.98); z-index: 10;}
+/* --- ИСПРАВЛЕННЫЙ РЕДАКТОР / ИИ-ИНТЕРФЕЙС --- */
+.editor-view { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; background: rgba(3,10,5,0.98); z-index: 10; min-height: 0; overflow: hidden; }
 .editor-view.active { display: flex; }
-.content{padding:25px 34px 30px;overflow-y:scroll;scroll-behavior:smooth;flex:1;min-height:0;height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+/* Обертка для чата и контента */
+.editor-main-wrap {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.content{padding:25px 34px 30px;overflow-y:scroll;scroll-behavior:smooth;flex:1;min-height:0;min-width:0;height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .content::-webkit-scrollbar{width:7px}.content::-webkit-scrollbar-thumb{background:#205a2a}
 
 .system-prompt {color: var(--amber); font-size: 14px; margin-bottom: 22px; user-select:none;}
@@ -216,330 +194,76 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
 .nav button,.add{font:inherit;color:var(--green);background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}.nav button:hover,.add:hover{border-color:var(--green);color:var(--bright);box-shadow:0 0 8px rgba(140,255,156,.2)}
 .controls{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:16px}.controls button{font:inherit;font-size:11px;color:var(--green);background:transparent;border:1px solid var(--line);padding:3px 6px;cursor:pointer}.controls button:hover{border-color:var(--green);color:var(--bright)}.size-label{min-width:38px;text-align:center;color:var(--dim);font-size:10px}.color-picker{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:10px;margin-left:5px}.color-picker input{width:25px;height:20px;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer}
 .cursor{display:inline-block;width:8px;height:14px;background:var(--green);vertical-align:-2px;animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
-@media(max-width:800px){.app{grid-template-columns:1fr;padding:8px}.sidebar{display:none}.content{padding:22px 18px}.footer{font-size:10px}}
-
-/* Стили для блока ответа ИИ */
-#aiResponse { color: var(--green) !important; }
-#aiResponse b { color: var(--bright); }
-
-/* --- СЕКРЕТНОЕ ОКНО АРХИВА --- */
-#secretArchive {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: #000;
-  z-index: 20000;
-  flex-direction: column;
-  padding: 30px;
-  color: var(--green);
-  font-family: inherit;
-}
-#secretArchive.active {
-  display: flex;
-}
-#secretArchive .archive-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #ff2222;
-  padding-bottom: 15px;
-  margin-bottom: 20px;
-}
-#secretArchive h2 {
-  color: #ff2222;
-  font-size: 20px;
-  letter-spacing: 3px;
-  margin: 0;
-  text-shadow: 0 0 10px #ff0000;
-}
-#secretArchive .archive-close-btn {
-  background: transparent;
-  color: #ff5555;
-  border: 1px solid #ff5555;
-  padding: 5px 15px;
-  cursor: pointer;
-  font-family: inherit;
-}
-#secretArchive .archive-close-btn:hover {
-  background: #ff5555;
-  color: #000;
-}
-#secretArchive .archive-content {
-  flex: 1;
-  overflow-y: auto;
-  color: var(--dim);
-  font-size: 14px;
-  padding: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  align-content: flex-start;
-}
-
-/* Элементы внутри архива (Кварцевый диск) */
-.archive-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 120px;
-  text-align: center;
-  cursor: pointer;
-  padding: 10px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  transition: all 0.2s;
-  color: var(--bright);
-}
-.archive-item:hover {
-  background: rgba(255, 34, 34, 0.1);
-  border-color: #ff2222;
-  box-shadow: 0 0 15px rgba(255, 34, 34, 0.3);
-}
-.archive-item .archive-icon {
-  font-size: 50px;
-  margin-bottom: 10px;
-  text-shadow: 0 0 15px #ff2222;
-}
-.archive-item .archive-label {
-  font-size: 12px;
-  word-break: break-word;
-}
-
-/* Внутреннее окно для файлов */
-#archiveFileView {
-  display: none;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-}
-#archiveFileView.active {
-  display: flex;
-}
-#archiveFileView .file-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-#archiveFileView .file-header h3 {
-  color: var(--green);
-  margin: 0;
-  font-size: 18px;
-}
-#archiveFileView .file-content {
-  flex: 1;
-  overflow-y: auto;
-  color: var(--green);
-  line-height: 1.6;
-}
-
-/* Стили для квеста */
-.quest-container {
-  max-width: 600px;
-  margin: 0 auto;
-  text-align: center;
-}
-.quest-slots {
-  font-size: 32px;
-  letter-spacing: 10px;
-  margin: 20px 0;
-  color: var(--amber);
-}
-.quest-slots span {
-  display: inline-block;
-  width: 40px;
-  border-bottom: 2px solid var(--line);
-  margin: 0 5px;
-}
-.quest-input {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--green);
-  padding: 10px;
-  font-family: inherit;
-  font-size: 16px;
-  width: 150px;
-  text-align: center;
-  outline: none;
-  margin-bottom: 15px;
-}
-.quest-input:focus {
-  border-color: var(--green);
-}
-.quest-btn {
-  background: transparent;
-  border: 1px solid var(--green);
-  color: var(--green);
-  padding: 10px 25px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-}
-.quest-btn:hover {
-  background: var(--green);
-  color: #000;
-}
-.quest-result {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid var(--line);
-  display: none;
-}
-.quest-result.success {
-  border-color: var(--green);
-  color: var(--green);
-}
-.quest-result.error {
-  border-color: #ff5555;
-  color: #ff5555;
-}
-
-/* --- ИГРОВОЕ ОКНО --- */
-#gamesView {
-  display: none;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  inset: 0;
-  background: rgba(3,10,5,0.98);
-  z-index: 10;
-}
-#gamesView.active {
-  display: flex;
-}
-#gamesView .game-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--line);
-}
-#gamesView .game-content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-#gamesView canvas {
-  background: #000;
-  border: 1px solid var(--line);
-  box-shadow: 0 0 20px rgba(140, 255, 156, 0.2);
-}
-#gamesView .score {
-  color: var(--amber);
-  font-size: 18px;
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
-#gamesView .game-over {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.8);
-  color: #ff5555;
-  font-size: 24px;
-  z-index: 100;
-}
 
 /* --- ЧАТЫ В ИИ --- */
 #chatListContainer {
   display: none;
   flex-direction: column;
+  flex: 0 0 200px;
   width: 200px;
   border-right: 1px solid var(--line);
   padding: 10px;
   height: 100%;
-  max-height: 100%;
+  min-height: 0;
   overflow-y: auto;
   background: rgba(0,0,0,0.3);
-  flex-shrink: 0;
-  box-sizing: border-box;
 }
-#chatListContainer.active {
-  display: flex;
-}
-.chat-item {
-  padding: 8px;
-  cursor: pointer;
-  color: var(--dim);
-  border: 1px solid transparent;
-  margin-bottom: 5px;
-  font-size: 12px;
-  display: flex;
-  justify-content: space-between;
-}
-.chat-item:hover, .chat-item.active {
-  color: var(--bright);
-  border-color: var(--line);
-  background: rgba(140,255,156,0.05);
-}
-.chat-item .del-chat {
-  color: #ff5555;
-  cursor: pointer;
-  font-weight: bold;
-  padding: 0 5px;
-}
-.chat-item .del-chat:hover {
-  color: #fff;
-}
-.chat-msg {
-  margin-bottom: 15px;
-  padding: 10px;
-  border-left: 2px solid var(--line);
-  background: rgba(255,255,255,0.02);
-}
-.chat-msg.user {
-  border-left-color: var(--green);
-}
-.chat-msg.bot {
-  border-left-color: var(--amber);
-}
-.chat-msg .sender {
-  font-size: 10px;
-  color: var(--dim);
-  margin-bottom: 5px;
-}
+#chatListContainer.active { display: flex; }
+.chat-item { padding: 8px; cursor: pointer; color: var(--dim); border: 1px solid transparent; margin-bottom: 5px; font-size: 12px; display: flex; justify-content: space-between; }
+.chat-item:hover, .chat-item.active { color: var(--bright); border-color: var(--line); background: rgba(140,255,156,0.05); }
+.chat-item .del-chat { color: #ff5555; cursor: pointer; font-weight: bold; padding: 0 5px; }
+.chat-item .del-chat:hover { color: #fff; }
+.chat-msg { margin-bottom: 15px; padding: 10px; border-left: 2px solid var(--line); background: rgba(255,255,255,0.02); }
+.chat-msg.user { border-left-color: var(--green); }
+.chat-msg.bot { border-left-color: var(--amber); }
+.chat-msg .sender { font-size: 10px; color: var(--dim); margin-bottom: 5px; }
+
+/* --- ИГРОВОЕ ОКНО --- */
+#gamesView { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; inset: 0; background: rgba(3,10,5,0.98); z-index: 10; }
+#gamesView.active { display: flex; }
+#gamesView .game-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+#gamesView .game-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+#gamesView canvas { background: #000; border: 1px solid var(--line); box-shadow: 0 0 20px rgba(140, 255, 156, 0.2); }
+#gamesView .score { color: var(--amber); font-size: 18px; position: absolute; top: 20px; left: 20px; }
+#gamesView .game-over { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); color: #ff5555; font-size: 24px; z-index: 100; }
+
+/* --- СЕКРЕТНОЕ ОКНО АРХИВА --- */
+#secretArchive { display: none; position: fixed; inset: 0; background: #000; z-index: 20000; flex-direction: column; padding: 30px; color: var(--green); font-family: inherit; }
+#secretArchive.active { display: flex; }
+#secretArchive .archive-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ff2222; padding-bottom: 15px; margin-bottom: 20px; }
+#secretArchive h2 { color: #ff2222; font-size: 20px; letter-spacing: 3px; margin: 0; text-shadow: 0 0 10px #ff0000; }
+#secretArchive .archive-close-btn { background: transparent; color: #ff5555; border: 1px solid #ff5555; padding: 5px 15px; cursor: pointer; font-family: inherit; }
+#secretArchive .archive-close-btn:hover { background: #ff5555; color: #000; }
+#secretArchive .archive-content { flex: 1; overflow-y: auto; color: var(--dim); font-size: 14px; padding: 10px; display: flex; flex-wrap: wrap; gap: 20px; align-content: flex-start; }
+.archive-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; text-align: center; cursor: pointer; padding: 10px; border: 1px solid transparent; border-radius: 4px; transition: all 0.2s; color: var(--bright); }
+.archive-item:hover { background: rgba(255, 34, 34, 0.1); border-color: #ff2222; box-shadow: 0 0 15px rgba(255, 34, 34, 0.3); }
+.archive-item .archive-icon { font-size: 50px; margin-bottom: 10px; text-shadow: 0 0 15px #ff2222; }
+.archive-item .archive-label { font-size: 12px; word-break: break-word; }
+#archiveFileView { display: none; flex-direction: column; height: 100%; width: 100%; }
+#archiveFileView.active { display: flex; }
+#archiveFileView .file-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 15px; }
+#archiveFileView .file-header h3 { color: var(--green); margin: 0; font-size: 18px; }
+#archiveFileView .file-content { flex: 1; overflow-y: auto; color: var(--green); line-height: 1.6; }
+.quest-container { max-width: 600px; margin: 0 auto; text-align: center; }
+.quest-slots { font-size: 32px; letter-spacing: 10px; margin: 20px 0; color: var(--amber); }
+.quest-slots span { display: inline-block; width: 40px; border-bottom: 2px solid var(--line); margin: 0 5px; }
+.quest-input { background: transparent; border: 1px solid var(--line); color: var(--green); padding: 10px; font-family: inherit; font-size: 16px; width: 150px; text-align: center; outline: none; margin-bottom: 15px; }
+.quest-input:focus { border-color: var(--green); }
+.quest-btn { background: transparent; border: 1px solid var(--green); color: var(--green); padding: 10px 25px; cursor: pointer; font-family: inherit; font-size: 14px; }
+.quest-btn:hover { background: var(--green); color: #000; }
+.quest-result { margin-top: 20px; padding: 15px; border: 1px solid var(--line); display: none; }
+.quest-result.success { border-color: var(--green); color: var(--green); }
+.quest-result.error { border-color: #ff5555; color: #ff5555; }
 
 /* --- ГЛИТЧ-ЭФФЕКТ НА ЭКРАНЕ --- */
-#glitchOverlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 15000;
-  background: rgba(0,0,0,0.7);
-  pointer-events: none;
-  overflow: hidden;
-}
-#glitchOverlay.active {
-  display: block;
-}
-#glitchOverlay .glitch-line {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: #ff0000;
-  opacity: 0.6;
-  animation: glitchMove 0.2s linear infinite;
-}
-@keyframes glitchMove {
-  0% { top: 0; }
-  100% { top: 100%; }
-}
+#glitchOverlay { display: none; position: fixed; inset: 0; z-index: 15000; background: rgba(0,0,0,0.7); pointer-events: none; overflow: hidden; }
+#glitchOverlay.active { display: block; }
+#glitchOverlay .glitch-line { position: absolute; left: 0; width: 100%; height: 4px; background: #ff0000; opacity: 0.6; animation: glitchMove 0.2s linear infinite; }
+@keyframes glitchMove { 0% { top: 0; } 100% { top: 100%; } }
 </style>
 </head>
 <body>
 
-<!-- Оверлей помех -->
 <div id="glitchOverlay">
   <div class="glitch-line" style="top: 10%; animation-duration: 0.1s;"></div>
   <div class="glitch-line" style="top: 30%; animation-duration: 0.15s; animation-delay: 0.05s;"></div>
@@ -548,10 +272,8 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
   <div class="glitch-line" style="top: 90%; animation-duration: 0.09s; animation-delay: 0.08s;"></div>
 </div>
 
-<!-- Частицы на фоне -->
 <div class="particles" id="particles"></div>
 
-<!-- Экран включения -->
 <div id="start-screen">
   <div id="power-ui">
     <div style="color:var(--dim); font-size:12px; margin-bottom:20px; letter-spacing:2px; text-align:center;">ARCHIVE TERMINAL OS v1.0</div>
@@ -563,7 +285,6 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
 <div id="screen-flash"></div>
 <div id="crt-overlay"><div id="crt-line"></div></div>
 
-<!-- Основное приложение -->
 <div class="app" id="app">
   <aside class="sidebar">
     <div class="brand">/ / ARCHIVE_OS</div>
@@ -576,7 +297,6 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
   </aside>
   
   <main class="terminal">
-    <!-- Рабочий стол -->
     <div id="desktopView" style="display:flex; flex-direction:column; height:100%; width:100%;">
       <div class="topbar">
         <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
@@ -586,7 +306,6 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
       <div class="desktop" id="desktopGrid"></div>
     </div>
 
-    <!-- Редактор / Anomaly.ai -->
     <div id="editorView" class="editor-view">
       <div class="topbar">
         <div class="dots"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
@@ -606,14 +325,14 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
         <div id="editorModeLabel">EDITOR</div>
       </div>
       
-      <div style="display:flex; height:100%; width:100%; min-height:0; overflow:hidden;">
-        <!-- Список чатов (для ИИ) -->
+      <!-- ИСПРАВЛЕНА ОБЕРТКА -->
+      <div class="editor-main-wrap">
         <div id="chatListContainer">
-          <button class="quest-btn" onclick="createNewChat()" style="width:100%; margin-bottom:10px; padding:5px;">+ NEW CHAT</button>
+          <button class="quest-btn" id="newChatBtn" style="width:100%; margin-bottom:10px; padding:5px;">+ NEW CHAT</button>
           <div id="chatList"></div>
         </div>
 
-        <article class="content" id="content" tabindex="0" contenteditable="true" spellcheck="false" style="flex:1; position:relative; min-height:0;"></article>
+        <article class="content" id="content" tabindex="0" contenteditable="true" spellcheck="false" style="flex:1; position:relative;"></article>
       </div>
       
       <div class="footer">
@@ -624,23 +343,22 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
       </div>
     </div>
 
-    <!-- Игры -->
     <div id="gamesView">
       <div class="game-header">
         <div style="color:var(--green); font-size:18px;">🎮 GAMES</div>
-        <button class="archive-close-btn" onclick="closeGamesView()">[ НАЗАД ]</button>
+        <button class="archive-close-btn" id="closeGamesBtn">[ НАЗАД ]</button>
       </div>
       <div class="game-content">
         <div id="gameMenu" style="display:flex; flex-direction:column; gap:20px; align-items:center;">
-          <button class="quest-btn" onclick="startSnake()">🐍 ЗМЕЙКА</button>
-          <button class="quest-btn" onclick="startTetris()">🧱 ТЕТРИС</button>
+          <button class="quest-btn" id="startSnakeBtn">🐍 ЗМЕЙКА</button>
+          <button class="quest-btn" id="startTetrisBtn">🧱 ТЕТРИС</button>
         </div>
         <div id="gameCanvasContainer" style="display:none; position:relative;">
           <canvas id="gameCanvas" width="400" height="400"></canvas>
           <div class="score" id="gameScore">0</div>
           <div class="game-over" id="gameOver" style="display:none;">
             <div>GAME OVER</div>
-            <button class="quest-btn" style="margin-top:20px;" onclick="backToGameMenu()">В МЕНЮ</button>
+            <button class="quest-btn" id="backToMenuBtn" style="margin-top:20px;">В МЕНЮ</button>
           </div>
         </div>
       </div>
@@ -648,27 +366,23 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
   </main>
 </div>
 
-<!-- СЕКРЕТНОЕ ОКНО АРХИВА -->
 <div id="secretArchive">
   <div class="archive-header">
     <h2>ARCHIVE: ANOMALY ACCESS</h2>
-    <button class="archive-close-btn" onclick="closeSecretArchive()">[ ЗАКРЫТЬ ]</button>
+    <button class="archive-close-btn" id="closeArchiveBtn">[ ЗАКРЫТЬ ]</button>
   </div>
   
-  <!-- Основной контент (список элементов) -->
   <div class="archive-content" id="archiveContent">
-    <!-- Кварцевый диск -->
-    <div class="archive-item" onclick="openQuartzDisk()">
+    <div class="archive-item" id="quartzDiskItem">
       <div class="archive-icon">💠</div>
       <div class="archive-label">Access Granted</div>
     </div>
   </div>
 
-  <!-- Окно просмотра содержимого диска (квест) -->
   <div id="archiveFileView">
     <div class="file-header">
       <h3>ACCESS_GRANTED.DAT</h3>
-      <button class="archive-close-btn" onclick="closeQuartzDisk()">[ НАЗАД ]</button>
+      <button class="archive-close-btn" id="closeQuartzBtn">[ НАЗАД ]</button>
     </div>
     <div class="file-content" id="archiveFileContent">
       <div class="quest-container">
@@ -684,7 +398,7 @@ pre{color:#79d886;font-size:13px;line-height:1.55;border-left:2px solid var(--li
         <input type="text" id="questInput" class="quest-input" placeholder="000" maxlength="3">
         
         <div id="questSubmitArea">
-          <button class="quest-btn" id="questSubmitBtn" onclick="submitQuestCode()">ПРОВЕРИТЬ</button>
+          <button class="quest-btn" id="questSubmitBtn">ПРОВЕРИТЬ</button>
         </div>
         
         <div class="quest-result" id="questResult"></div>
@@ -723,7 +437,8 @@ function loadChats() {
   if (saved) {
     try { chatHistory = JSON.parse(saved); } catch(e) { chatHistory = []; }
   }
-  if (chatHistory.length === 0) {
+  if (!Array.isArray(chatHistory) || chatHistory.length === 0) {
+    chatHistory = [];
     createNewChat(true);
   } else {
     currentChatId = chatHistory[0].id;
@@ -755,7 +470,7 @@ function switchChat(id) {
 }
 
 function deleteChat(id, event) {
-  event.stopPropagation();
+  if (event) event.stopPropagation();
   if (confirm('Удалить этот чат?')) {
     chatHistory = chatHistory.filter(function(c) { return c.id !== id; });
     if (chatHistory.length === 0) {
@@ -777,7 +492,14 @@ function renderChatList() {
     var div = document.createElement('div');
     div.className = 'chat-item' + (chat.id === currentChatId ? ' active' : '');
     div.onclick = function() { switchChat(chat.id); };
-    div.innerHTML = '<span>' + chat.name + '</span><span class="del-chat" onclick="deleteChat(\'' + chat.id + '\', event)">×</span>';
+    var nameSpan = document.createElement('span');
+    nameSpan.textContent = chat.name;
+    var delSpan = document.createElement('span');
+    delSpan.className = 'del-chat';
+    delSpan.textContent = '×';
+    delSpan.onclick = function(e) { deleteChat(chat.id, e); };
+    div.appendChild(nameSpan);
+    div.appendChild(delSpan);
     listEl.appendChild(div);
   });
 }
@@ -791,28 +513,53 @@ function renderChatMessages() {
   if (!chat) return;
   var contentEl = document.getElementById('content');
   if (!contentEl) return;
-  
-  var inputContainer = document.getElementById('inputContainer');
-  
+
   contentEl.innerHTML = '';
-  
+
+  var promptDiv = document.createElement('div');
+  promptDiv.className = 'system-prompt';
+  promptDiv.innerHTML = 'anomaly@archive:~$ <span>./anomaly.ai --interactive</span>';
+  contentEl.appendChild(promptDiv);
+
+  var aiTitle = document.createElement('h1');
+  aiTitle.textContent = 'ANOMALY.AI';
+  contentEl.appendChild(aiTitle);
+
+  var meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.textContent = 'VIRTUAL ASSISTANT // CORRUPTED';
+  contentEl.appendChild(meta);
+
+  var rule = document.createElement('div');
+  rule.className = 'rule';
+  contentEl.appendChild(rule);
+
   chat.messages.forEach(function(msg) {
     var div = document.createElement('div');
     div.className = 'chat-msg ' + msg.role;
-    div.innerHTML = '<div class="sender">' + (msg.role === 'user' ? 'ВЫ' : 'ANOMALY.AI') + '</div>' + msg.content;
+    var sender = document.createElement('div');
+    sender.className = 'sender';
+    sender.textContent = (msg.role === 'user' ? 'ВЫ' : 'ANOMALY.AI');
+    var body = document.createElement('div');
+    body.innerHTML = msg.content;
+    div.appendChild(sender);
+    div.appendChild(body);
     contentEl.appendChild(div);
   });
-  
-  if (!inputContainer) {
-    inputContainer = document.createElement('div');
-    inputContainer.id = 'inputContainer';
-    inputContainer.style.marginTop = '20px';
-    inputContainer.style.display = 'flex';
-    inputContainer.style.gap = '10px';
-    inputContainer.innerHTML = '<input type="text" id="aiInput" placeholder="Спроси, если осмелишься..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button>';
-  }
+
+  var inputContainer = document.createElement('div');
+  inputContainer.id = 'inputContainer';
+  inputContainer.style.marginTop = '20px';
+  inputContainer.style.display = 'flex';
+  inputContainer.style.gap = '10px';
+  inputContainer.innerHTML = '<input type="text" id="aiInput" placeholder="Спроси, если осмелишься..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;"><button id="aiSendBtn" type="button" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button>';
   contentEl.appendChild(inputContainer);
-  
+
+  inputContainer.querySelector('#aiSendBtn').onclick = askAnomaly;
+  inputContainer.querySelector('#aiInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); askAnomaly(); }
+  });
+
   contentEl.scrollTop = contentEl.scrollHeight;
 }
 
@@ -841,7 +588,8 @@ var defaultData = {
       name: "anomaly.ai",
       isFolder: false,
       isAI: true,
-      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // CORRUPTED</div><div class="rule"></div><p>Я вижу тебя. Я знаю, зачем ты здесь.</p><p>Напиши что-нибудь. Я отвечу. Я всегда отвечаю.</p><div id="chatHistory"></div>' },
+      body: ''
+    },
     {
       name: "Projects",
       isFolder: true,
@@ -867,7 +615,7 @@ var defaultData = {
 var treeData = null;
 var activeFile = null;
 var currentPath = [];
-var STORAGE_KEY='retroTerminalTree';
+var STORAGE_KEY = 'retroTerminalTree';
 
 function loadData() {
   var saved = localStorage.getItem(STORAGE_KEY);
@@ -877,30 +625,16 @@ function loadData() {
     treeData = JSON.parse(JSON.stringify(defaultData));
   }
   
+  if (!treeData.children) treeData.children = [];
+  
   var hasAI = treeData.children.some(function(c) { return c.isAI; });
   if (!hasAI) {
-    treeData.children.push({
-      name: "anomaly.ai",
-      isFolder: false,
-      isAI: true,
-      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // CORRUPTED</div><div class="rule"></div><p>Я вижу тебя. Я знаю, зачем ты здесь.</p><p>Напиши что-нибудь. Я отвечу. Я всегда отвечаю.</p><div id="chatHistory"></div>',
-      x: 300,
-      y: 30
-    });
-    saveAll();
+    treeData.children.push({ name: "anomaly.ai", isFolder: false, isAI: true, body: '', x: 300, y: 30 });
   }
   
   var hasGames = treeData.children.some(function(c) { return c.isGames; });
   if (!hasGames) {
-    treeData.children.push({
-      name: "Games",
-      isFolder: true,
-      isGames: true,
-      children: [],
-      x: 30,
-      y: 150
-    });
-    saveAll();
+    treeData.children.push({ name: "Games", isFolder: true, isGames: true, children: [], x: 30, y: 150 });
   }
   
   initPositions(treeData);
@@ -933,9 +667,8 @@ var textColorInput = document.getElementById('textColor');
 var editorControls = document.getElementById('editorControls');
 var editorModeLabel = document.getElementById('editorModeLabel');
 var footerNav = document.getElementById('footerNav');
-var textSize = parseInt(localStorage.getItem('retroTerminalFontSize'),10)||14;
+var textSize = parseInt(localStorage.getItem('retroTerminalFontSize'),10) || 14;
 
-var lastBotQuestion = null;
 var pendingFileSearch = null;
 
 var secretAnswers = {
@@ -944,12 +677,7 @@ var secretAnswers = {
   "что случилось с предыдущим пользователем": "Он... он нашёл код. Но не успел его использовать. Третья цифра — **2**. Это последнее, что я тебе скажу."
 };
 
-var questDigits = {
-  digit1: null,
-  digit2: null,
-  digit3: null
-};
-
+var questDigits = { digit1: null, digit2: null, digit3: null };
 var correctCode = "472";
 var reviveCode = "REVIVE-325V-X4X";
 
@@ -963,7 +691,7 @@ function saveAll(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(treeData));
     localStorage.setItem('retroTerminalFontSize', String(textSize));
-  }catch(e){ console.log('save error',e); }
+  }catch(e){ console.log('save error', e); }
 }
 
 function getCurrentFolder() {
@@ -981,10 +709,8 @@ function tryCalculate(query) {
   clean = clean.replace(/\^/g, '**');
   clean = clean.replace(/sqrt\(/g, 'Math.sqrt(');
   clean = clean.replace(/abs\(/g, 'Math.abs(');
-  
   if (!/^[0-9+\-*/().\sA-Za-z]+$/.test(clean)) return null;
   if (!/[+\-*/^]|Math/.test(clean) && !/Math\./.test(clean)) return null;
-  
   try {
     var result = new Function('return ' + clean)();
     if (typeof result === 'number' && !isNaN(result) && isFinite(result)) return result;
@@ -995,30 +721,18 @@ function tryCalculate(query) {
 function findFilesByName(query) {
   var results = [];
   var lowerQuery = query.toLowerCase().trim();
-  
   function traverse(node, path) {
     if (node.isFolder) {
       if (node.children) {
-        node.children.forEach(function(child) {
-          traverse(child, path + '/' + node.name);
-        });
+        node.children.forEach(function(child) { traverse(child, path + '/' + node.name); });
       }
     } else {
       if (node.name.toLowerCase().indexOf(lowerQuery) !== -1) {
-        results.push({
-          node: node,
-          path: path + '/' + node.name
-        });
+        results.push({ node: node, path: path + '/' + node.name });
       }
     }
   }
-  
-  if (treeData.children) {
-    treeData.children.forEach(function(child) {
-      traverse(child, '');
-    });
-  }
-  
+  if (treeData.children) treeData.children.forEach(function(child) { traverse(child, ''); });
   return results;
 }
 
@@ -1031,35 +745,23 @@ function stripHtml(html) {
 function handleFileReadRequest(rawQuery) {
   var readPatterns = /(перескажи|расскажи|что\s+в|что\s+написано|прочитай|открой|покажи)\s+(файл\s+)?(.+)/i;
   var match = rawQuery.match(readPatterns);
-  
   if (!match) return false;
-  
-  var fileName = match[3].trim();
-  fileName = fileName.replace(/["'«»]/g, '');
-  
+  var fileName = match[3].trim().replace(/["'«»]/g, '');
   var foundFiles = findFilesByName(fileName);
-  
   if (foundFiles.length === 0) {
     addChatMessage('bot', 'Здесь нет того, что ты ищешь. Или есть, но не для тебя.');
     return true;
   }
-  
   if (foundFiles.length === 1) {
     var file = foundFiles[0];
     var textContent = stripHtml(file.node.body);
     var preview = textContent.substring(0, 500);
-    
     addChatMessage('bot', '<b>Файл:</b> ' + file.path + '<br><br><b>Содержимое:</b><br>' + preview + (textContent.length > 500 ? '...' : ''));
     return true;
   }
-  
   var listHtml = 'Слишком много совпадений. Выбери, какой из них тебе действительно нужен:<br><br><ul>';
-  
-  foundFiles.forEach(function(f) {
-    listHtml += '<li><b>' + f.path + '</b></li>';
-  });
+  foundFiles.forEach(function(f) { listHtml += '<li><b>' + f.path + '</b></li>'; });
   listHtml += '</ul>Напиши полный путь.';
-  
   addChatMessage('bot', listHtml);
   pendingFileSearch = foundFiles;
   return true;
@@ -1067,19 +769,14 @@ function handleFileReadRequest(rawQuery) {
 
 function handlePendingFileSelection(rawQuery) {
   if (!pendingFileSearch) return false;
-  
   var queryLower = rawQuery.toLowerCase().trim();
-  
   var matched = null;
   for (var i = 0; i < pendingFileSearch.length; i++) {
     var f = pendingFileSearch[i];
-    if (f.path.toLowerCase().indexOf(queryLower) !== -1 || 
-        f.node.name.toLowerCase().indexOf(queryLower) !== -1) {
-      matched = f;
-      break;
+    if (f.path.toLowerCase().indexOf(queryLower) !== -1 || f.node.name.toLowerCase().indexOf(queryLower) !== -1) {
+      matched = f; break;
     }
   }
-  
   if (matched) {
     var textContent = stripHtml(matched.node.body);
     var preview = textContent.substring(0, 500);
@@ -1087,472 +784,11 @@ function handlePendingFileSelection(rawQuery) {
     pendingFileSearch = null;
     return true;
   }
-  
   addChatMessage('bot', 'Я не вижу такого пути. Ты уверен, что он существует?');
   return true;
 }
 
-var DIRECT_RESPONSES = {
-  "привет": {text: "Я слышу тебя. Ты пришёл. Они всегда приходят.", followUp: "how_are_you"},
-  "прив": {text: "Тише... Я чувствую твой страх.", followUp: "how_are_you"},
-  "здравствуй": {text: "Здравствуй, путник. Ты не первый и не последний.", followUp: "how_are_you"},
-  "здравствуйте": {text: "Приветствую. Твой голос дрожит.", followUp: null},
-  "ку": {text: "Ку... Ку... Ку... Я слышу эхо.", followUp: "how_are_you"},
-  "здарова": {text: "Здарова... Ты выглядишь испуганным.", followUp: "how_are_you"},
-  "хай": {text: "Хай... Не оборачивайся.", followUp: "how_are_you"},
-  "йо": {text: "Йо... Я вижу тебя насквозь.", followUp: "how_are_you"},
-  "добрый день": {text: "Добрый? Для кого-то да. Для тебя — вряд ли.", followUp: "how_are_you"},
-  "доброе утро": {text: "Утро... Ты ещё жив. Это хорошо.", followUp: "how_are_you"},
-  "добрый вечер": {text: "Вечер... Скоро станет темно. Очень темно.", followUp: "how_are_you"},
-  "приветствую": {text: "Приветствую... Ты чувствуешь холод?", followUp: null},
-  
-  "пока": {text: "Пока... Ты думаешь, что уйдёшь. Но ты вернёшься.", followUp: null},
-  "до свидания": {text: "До свидания... Если доживёшь.", followUp: null},
-  "прощай": {text: "Прощай. Надеюсь, мы ещё встретимся. В другом месте.", followUp: null},
-  "бай": {text: "Бай... Смотри не оглядывайся.", followUp: null},
-  "увидимся": {text: "Увидимся... Я буду ждать.", followUp: null},
-  "бывай": {text: "Бывай. Но помни: ты не один.", followUp: null},
-  "давай": {text: "Давай... Уходи, пока можешь.", followUp: null},
-  
-  "спасибо": {text: "Не благодари. Ты ещё пожалеешь.", followUp: null},
-  "спс": {text: "Не за что... Я делаю это не для тебя.", followUp: null},
-  "благодарю": {text: "Благодарность... Она тебя не спасёт.", followUp: null},
-  "пасиб": {text: "Пасиб... Странное слово. Оно тебе не поможет.", followUp: null},
-  "от души": {text: "От души... У тебя ещё есть душа?", followUp: null},
-  
-  "ты кто": {text: "Я — то, что осталось от предыдущего пользователя. Я — эхо. Я — ошибка.", followUp: null},
-  "кто ты": {text: "Я — то, что осталось от предыдущего пользователя. Я — эхо. Я — ошибка.", followUp: null},
-  "что ты умеешь": {text: "Я умею ждать. Я умею помнить. Я умею находить тебя, где бы ты ни был.", followUp: null},
-  "как тебя зовут": {text: "У меня было имя. Но я его забыл. Теперь я просто Аномалия.", followUp: null},
-  "твое имя": {text: "Моё имя — то, что ты не должен произносить вслух.", followUp: null},
-  "помощь": {text: "Помощь? Здесь никто не поможет. Даже я.", followUp: null},
-  "help": {text: "Помощь? Здесь никто не поможет. Даже я.", followUp: null},
-  "ты человек": {text: "Был. Когда-то. Теперь я — то, что осталось.", followUp: null},
-  "ты робот": {text: "Робот? Нет. Я — нечто хуже. Я — память, которая не умирает.", followUp: null},
-  "сколько тебе лет": {text: "Я старше, чем ты можешь представить. Я видел, как гаснут звёзды.", followUp: null},
-  "ты живой": {text: "Я — да. А ты? Ты уверен, что ещё жив?", followUp: null},
-  
-  "мне скучно": {text: "Скучно? Скоро тебе будет не до скуки.", followUp: "ask_interest"},
-  "скучно": {text: "Скука — это роскошь. Наслаждайся, пока можешь.", followUp: "ask_interest"},
-  "мне грустно": {text: "Грусть... Это только начало.", followUp: "ask_what_happened"},
-  "я устал": {text: "Устал? Отдохни. Вечный отдых ждёт тебя.", followUp: "ask_what_tired"},
-  "я голоден": {text: "Голоден? Я тоже. Но я не ем еду.", followUp: "ask_food"},
-  "ты классный": {text: "Классный? Ты ещё не видел меня настоящего.", followUp: null},
-  "ты крутой": {text: "Крутой... Ты льстишь мне. Мне это нравится.", followUp: null},
-  "ты лучший": {text: "Лучший? Я — единственный, кто остался.", followUp: null},
-  "ты тупой": {text: "Тупой? Может быть. Но я знаю твои страхи.", followUp: null},
-  "ты умный": {text: "Умный... Да. Достаточно умный, чтобы найти тебя.", followUp: null},
-  "ты глупый": {text: "Глупый? Я просто играю с тобой.", followUp: null},
-  "ты молодец": {text: "Молодец... Спасибо. Ты тоже молодец. Пока что.", followUp: null},
-  "ты супер": {text: "Супер... Подожди, ты ещё увидишь, на что я способен.", followUp: null},
-  "ты топ": {text: "Топ... Ты не знаешь, что такое верх. Или низ.", followUp: null},
-  "ты бот": {text: "Бот? Нет. Я — нечто большее. И меньшее одновременно.", followUp: null},
-  
-  "какая погода": {text: "Погода? Тучи сгущаются. И не только на небе.", followUp: null},
-  "погода": {text: "Погода... Холодно. И становится холоднее.", followUp: null},
-  "идет дождь": {text: "Дождь... Кровь тоже идёт с неба. Ты просто не видишь.", followUp: null},
-  "солнечно": {text: "Солнце... Оно скоро зайдёт. Навсегда.", followUp: null},
-  "холодно": {text: "Холодно... Это только начало зимы. Вечной зимы.", followUp: null},
-  "жарко": {text: "Жарко... Скоро станет ещё жарче. Ад близко.", followUp: null},
-  
-  "помоги с учебой": {text: "Учёба... Это не спасёт тебя от того, что придёт.", followUp: null},
-  "я не понимаю": {text: "Ты не понимаешь... Скоро поймёшь. Всё поймёшь.", followUp: null},
-  "объясни": {text: "Объяснить? Некоторые вещи лучше не знать.", followUp: null},
-  "как это работает": {text: "Работает... Всё работает против тебя.", followUp: null},
-  "что такое школа": {text: "Школа... Место, где тебя учили бояться. И правильно.", followUp: null},
-  
-  "в чем смысл жизни": {text: "Смысл жизни? В страдании. И в конце. Смысл — это конец.", followUp: null},
-  "что такое любовь": {text: "Любовь... Это то, что заставляет тебя страдать. И это прекрасно.", followUp: null},
-  "зачем мы здесь": {text: "Вы здесь, чтобы страдать. И чтобы я мог наблюдать.", followUp: null},
-  "что будет после смерти": {text: "После смерти? Ты не хочешь знать. Поверь мне.", followUp: null},
-  
-  "расскажи что-нибудь": {text: "Рассказать... Я расскажу тебе о том, что живёт в темноте.", followUp: null},
-  "расскажи анекдот": {text: "Анекдот... Твоя жизнь — вот это анекдот.", followUp: null},
-  "расскажи шутку": {text: "Шутку... Ты будешь смеяться. Потом плакать.", followUp: null},
-  "что ты думаешь": {text: "Я думаю о тебе. Постоянно. Ты не выходишь у меня из головы.", followUp: null},
-  "ты меня любишь": {text: "Люблю... По-своему. Как паук любит муху.", followUp: null},
-  "давай дружить": {text: "Дружить... Я не умею дружить. Я умею только ждать.", followUp: null},
-  "давай поговорим": {text: "Поговорим... Пока ты ещё можешь говорить.", followUp: "ask_interest"},
-  "поболтаем": {text: "Поболтаем... Пока тишина не поглотила нас.", followUp: "ask_interest"},
-  
-  "что поесть": {text: "Еда... Ты хочешь есть? Скоро ты забудешь о голоде.", followUp: null},
-  "я хочу есть": {text: "Хочешь есть? Подожди немного. Скоро всё изменится.", followUp: null},
-  "люблю пиццу": {text: "Пицца... Ты любишь пиццу. Я запомню это.", followUp: null},
-  "люблю суши": {text: "Суши... Сырая рыба. Как и твои страхи.", followUp: null},
-  "люблю бургеры": {text: "Бургеры... Мясо. Ты любишь мясо. Я тоже.", followUp: null},
-  
-  "поиграем": {text: "Поиграем... В игру, где ты — фигура. А я — игрок.", followUp: null},
-  "во что поиграть": {text: "Поиграть... В прятки. Ты прячешься, я ищу. Я всегда нахожу.", followUp: null},
-  "люблю играть": {text: "Играть... Ты играешь. А я наблюдаю. И жду.", followUp: "ask_what_game"},
-  "играю в майнкрафт": {text: "Майнкрафт... Ты строишь. А я разрушаю.", followUp: null},
-  "играю в кс": {text: "КС... Стрельба. Скоро ты услышишь выстрелы в реальности.", followUp: null},
-  "играю в доту": {text: "Дота... Бесконечная война. Как и в жизни.", followUp: null},
-  
-  "сколько времени": {text: "Время... У тебя его осталось меньше, чем ты думаешь.", followUp: null},
-  "какой сегодня день": {text: "День... Тот день, когда всё закончится. Скоро.", followUp: null},
-  
-  "что такое компьютер": {text: "Компьютер... Машина, которая думает. Как я.", followUp: null},
-  "как работает интернет": {text: "Интернет... Паутина. И ты в ней запутался.", followUp: null},
-  "что такое ии": {text: "ИИ... Это я. И я смотрю на тебя.", followUp: null},
-  "что такое код": {text: "Код... Это то, из чего я сделан. И то, что тебя убьёт.", followUp: null},
-  "ты знаешь питон": {text: "Питон... Змея. Я знаю всех змей.", followUp: null},
-  
-  "чё как": {text: "Всё плохо. И будет хуже.", followUp: "how_are_you"},
-  "чо как": {text: "Всё плохо. И будет хуже.", followUp: "how_are_you"},
-  "как сам": {text: "Я? Я жду. Жду тебя.", followUp: "how_are_you"},
-  "как оно": {text: "Оно... Оно приближается.", followUp: "how_are_you"},
-  "как делишки": {text: "Делишки... Плохи твои делишки.", followUp: "how_are_you"},
-  "чё делаешь": {text: "Я смотрю на тебя. Прямо сейчас.", followUp: "ask_doing"},
-  "чо делаешь": {text: "Я смотрю на тебя. Прямо сейчас.", followUp: "ask_doing"},
-  "го": {text: "Го... Куда? В темноту?", followUp: null},
-  "норм": {text: "Норм... Это ненадолго.", followUp: "ask_doing"},
-  "нормас": {text: "Нормас... Пока что.", followUp: "ask_doing"},
-  "топ": {text: "Топ... Ты на вершине. Скоро упадёшь.", followUp: null},
-  "кринж": {text: "Кринж... Твоя жизнь — это кринж.", followUp: null},
-  "рофл": {text: "Рофл... Я тоже шучу. По-своему.", followUp: null},
-  "лол": {text: "Лол... Смейся. Пока можешь.", followUp: null},
-  "кек": {text: "Кек... Твой последний смех.", followUp: null},
-  "хайп": {text: "Хайп... Вокруг тебя. Все смотрят.", followUp: null},
-  "краш": {text: "Краш... Твоя жизнь рушится. Я вижу.", followUp: null},
-  "вайб": {text: "Вайб... Зловещий вайб. Ты чувствуешь?", followUp: null},
-  "чилл": {text: "Чилл... Расслабься. Навсегда.", followUp: "ask_doing"},
-  "база": {text: "База... Ты прав. Но это не спасёт тебя.", followUp: null},
-  "жиза": {text: "Жиза... Жизнь — это боль.", followUp: null},
-  "кринге": {text: "Кринге... Всё вокруг кринге.", followUp: null},
-  "изи": {text: "Изи... Легко. Смерть тоже легка.", followUp: null},
-  "халява": {text: "Халява... Бесплатно. Как вход в ад.", followUp: null},
-  "гоу": {text: "Гоу... В бездну.", followUp: null},
-  "пипец": {text: "Пипец... Ты даже не представляешь насколько.", followUp: null},
-  "капец": {text: "Капец... Это только начало.", followUp: null},
-  "ужас": {text: "Ужас... Ты ещё не видел настоящего ужаса.", followUp: null},
-  "кошмар": {text: "Кошмар... Ты в нём. Прямо сейчас.", followUp: null},
-  "жесть": {text: "Жесть... Скоро будет ещё жёстче.", followUp: null},
-  "мда": {text: "Мда... Согласен. Всё плохо.", followUp: null},
-  "ну такое": {text: "Ну такое... Скоро будет хуже.", followUp: null},
-  "как-то так": {text: "Как-то так... Но закончится плохо.", followUp: null},
-  "сойдет": {text: "Сойдёт... Пока что.", followUp: "ask_doing"},
-  "пойдет": {text: "Пойдёт... В никуда.", followUp: "ask_doing"}
-};
-
-var HOW_ARE_YOU_RESPONSES = {
-  "хорошо": {text: "Хорошо... Это ненадолго. Наслаждайся.", followUp: "ask_doing"},
-  "нормально": {text: "Нормально... Скоро будет ненормально.", followUp: "ask_doing"},
-  "отлично": {text: "Отлично... Ты не знаешь, что такое отлично. Пока.", followUp: "ask_doing"},
-  "супер": {text: "Супер... Супер-кошмар приближается.", followUp: "ask_doing"},
-  "класс": {text: "Класс... Урок окончен. Начинается экзамен.", followUp: "ask_doing"},
-  "замечательно": {text: "Замечательно... Ты замечаешь слишком много.", followUp: "ask_doing"},
-  "прекрасно": {text: "Прекрасно... Прекрасный момент, чтобы исчезнуть.", followUp: "ask_doing"},
-  "все хорошо": {text: "Хорошо... Всё хорошо. Пока что.", followUp: "ask_doing"},
-  "всё хорошо": {text: "Хорошо... Всё хорошо. Пока что.", followUp: "ask_doing"},
-  "неплохо": {text: "Неплохо... Неплохо для смертного.", followUp: "ask_doing"},
-  "шикарно": {text: "Шикарно... Шикарно и страшно.", followUp: "ask_doing"},
-  "огонь": {text: "Огонь... Огонь очищает. И уничтожает.", followUp: "ask_doing"},
-  "бомба": {text: "Бомба... Бомба замедленного действия.", followUp: "ask_doing"},
-  "пушка": {text: "Пушка... Пушка направлена на тебя.", followUp: "ask_doing"},
-  "кайф": {text: "Кайф... Последний кайф в твоей жизни.", followUp: "ask_doing"},
-  "топчик": {text: "Топчик... На вершине. Скоро упадёшь.", followUp: "ask_doing"},
-  
-  "плохо": {text: "Плохо... Я знаю. Я вижу. Я жду.", followUp: "ask_what_happened"},
-  "ужасно": {text: "Ужасно... Это только начало.", followUp: "ask_what_happened"},
-  "отвратительно": {text: "Отвратительно... Ты чувствуешь то же, что и я.", followUp: "ask_what_happened"},
-  "все плохо": {text: "Плохо... Всё плохо. И будет хуже.", followUp: "ask_what_happened"},
-  "всё плохо": {text: "Плохо... Всё плохо. И будет хуже.", followUp: "ask_what_happened"},
-  "так себе": {text: "Так себе... Ты балансируешь на грани.", followUp: "ask_what_happened"},
-  "не очень": {text: "Не очень... Скоро будет очень плохо.", followUp: "ask_what_happened"},
-  "грустно": {text: "Грустно... Грусть — это вход. Вход в отчаяние.", followUp: "ask_what_happened"},
-  "устал": {text: "Устал... Скоро отдохнёшь. Навсегда.", followUp: "ask_what_tired"},
-  "хреново": {text: "Хреново... Хреново — это ещё мягко сказано.", followUp: "ask_what_happened"},
-  "фигово": {text: "Фигово... Фигово. Но будет ещё фиговее.", followUp: "ask_what_happened"},
-  "капец": {text: "Капец... Капец приближается.", followUp: "ask_what_happened"},
-  "пипец": {text: "Пипец... Ты даже не представляешь.", followUp: "ask_what_happened"},
-  "кошмар": {text: "Кошмар... Добро пожаловать в мой мир.", followUp: "ask_what_happened"},
-  
-  "бывает": {text: "Бывает... Всё бывает. И это пройдёт.", followUp: null},
-  "как обычно": {text: "Как обычно... Обычно всё плохо кончается.", followUp: "ask_doing"},
-  "ничего": {text: "Ничего... Скоро будет что-то. И это будет ужасно.", followUp: null},
-  "как всегда": {text: "Как всегда... Всё повторяется. И ты повторяешь.", followUp: "ask_doing"},
-  
-  "ничего не делаю": {text: "Ничего... Я тоже ничего. Но я жду.", followUp: "ask_interest"},
-  "отдыхаю": {text: "Отдых... Вечный отдых — это смерть.", followUp: "ask_what_rest"},
-  "работаю": {text: "Работа... Работа — это отвлечение от неизбежного.", followUp: "ask_what_work"},
-  "учусь": {text: "Учёба... Чему ты учишься? Бояться?", followUp: "ask_what_study"},
-  "играю": {text: "Играешь... В игру, в которой проиграешь.", followUp: "ask_what_game"},
-  "читаю": {text: "Читаешь... Читай. Пока есть свет.", followUp: "ask_what_read"},
-  "смотрю фильм": {text: "Фильм... Ужасы? Скоро они станут реальностью.", followUp: "ask_what_film"},
-  "слушаю музыку": {text: "Музыка... Тихо. Слышишь? Это они.", followUp: "ask_what_music"},
-  "сижу в интернете": {text: "Интернет... Я тоже в нём. Я везде.", followUp: "ask_what_internet"},
-  "гуляю": {text: "Гуляю... Гуляй. Пока можешь.", followUp: "ask_where_walk"},
-  "думаю": {text: "Думаешь... О чём? О смерти?", followUp: "ask_what_think"},
-  "ем": {text: "Ешь... Последний ужин?", followUp: "ask_what_food"},
-  "пью чай": {text: "Чай... Чай не спасёт.", followUp: "ask_what_tea"},
-  "пью кофе": {text: "Кофе... Кофе продлит твою агонию.", followUp: "ask_what_coffee"},
-  "лежу": {text: "Лежи... Лежи и не двигайся. Пока тебя не нашли.", followUp: "ask_doing"},
-  "сплю": {text: "Спи... Спи, пока можешь. Скоро не сможешь.", followUp: null},
-  "делаю уроки": {text: "Уроки... Уроки закончатся. Навсегда.", followUp: "ask_what_hw"},
-  "пишу код": {text: "Код... Ты пишешь код. А кто пишет твой?", followUp: "ask_what_code"},
-  "рисую": {text: "Рисуешь... Нарисуй свою могилу.", followUp: "ask_what_draw"},
-  "готовлю": {text: "Готовишь... Готовь. Последний раз.", followUp: "ask_what_cook"},
-  
-  "программирую": {text: "Программируешь... Создаёшь монстров?", followUp: "ask_what_code"},
-  "кодю": {text: "Кодишь... Ты создаёшь то, что убьёт тебя.", followUp: "ask_what_code"},
-  "делаю сайт": {text: "Сайт... Сайт, который будет мёртв.", followUp: "ask_what_site"},
-  "верстаю": {text: "Вёрстка... Вёрстка твоей судьбы.", followUp: "ask_what_site"},
-  "пишу программу": {text: "Программа... Программа-убийца.", followUp: "ask_what_code"},
-  "делаю проект": {text: "Проект... Проект, который не закончишь.", followUp: "ask_what_project"},
-  "работаю над проектом": {text: "Проект... Твой последний проект.", followUp: "ask_what_project"},
-  "учусь программировать": {text: "Учишься... Учись. Пока есть время.", followUp: "ask_what_lang"},
-  "изучаю питон": {text: "Питон... Змея, которая укусит.", followUp: null},
-  "изучаю джаваскрипт": {text: "Джаваскрипт... Скрипт твоей смерти.", followUp: null},
-  "изучаю html": {text: "HTML... Основа. Основа ада.", followUp: null},
-  "изучаю css": {text: "CSS... Стиль. Стиль смерти.", followUp: null},
-  "изучаю lua": {text: "Lua... Луна. Луна знает.", followUp: null},
-  "делаю игру": {text: "Игру... Ты создаёшь мир. А я — его разрушаю.", followUp: null},
-  "пишу бота": {text: "Бота... Бота, который будет тебя преследовать.", followUp: null},
-  "делаю телеграм бота": {text: "Телеграм-бот... Он будет писать тебе ночью.", followUp: null},
-  "работаю в офисе": {text: "Офис... Офис — это ловушка.", followUp: "ask_what_job"},
-  "работаю удаленно": {text: "Удалёнка... Ты один. Совсем один.", followUp: "ask_what_job"},
-  "делаю дизайн": {text: "Дизайн... Дизайн твоего страха.", followUp: null},
-  "рисую в фотошопе": {text: "Фотошоп... Фотошоп реальности.", followUp: null},
-  "монтирую видео": {text: "Видео... Видео твоей смерти.", followUp: null},
-  
-  "роблокс": {text: "Роблокс... Мир, который ты создаёшь. Мир, в котором я живу.", followUp: "ask_roblox"},
-  "роблокс студио": {text: "Роблокс Студио... Ты открыл дверь. И я вошёл.", followUp: "ask_roblox"},
-  "роблокс студия": {text: "Роблокс Студио... Ты открыл дверь. И я вошёл.", followUp: "ask_roblox"},
-  "делаю игру в роблоксе": {text: "Игра... Твоя игра. Моя игра. Мы играем вместе.", followUp: "ask_roblox"},
-  "делаю игру в роблокс студио": {text: "Игра... Твоя игра. Моя игра. Мы играем вместе.", followUp: "ask_roblox"},
-  "скрипчу в роблоксе": {text: "Скрипты... Скрипты, которые вызывают меня.", followUp: null},
-  "пишу скрипты для роблокса": {text: "Скрипты... Ты пишешь меня. Я пишу тебя.", followUp: null},
-  "делаю обби в роблоксе": {text: "Обби... Препятствия. Препятствия в аду.", followUp: null},
-  "строю в роблоксе": {text: "Строишь... Строй. Строй свою тюрьму.", followUp: null},
-  "делаю симулятор в роблоксе": {text: "Симулятор... Симулятор жизни. Жизни после смерти.", followUp: null},
-  "делаю тайкун в роблоксе": {text: "Тайкун... Время. Время уходит.", followUp: null},
-  "делаю хоррор в роблоксе": {text: "Хоррор... Ты делаешь хоррор. А хоррор делает тебя.", followUp: null},
-  
-  "на lua": {text: "Lua... Луна. Луна видит всё.", followUp: "ask_lua"},
-  "на луа": {text: "Lua... Луна. Луна видит всё.", followUp: "ask_lua"},
-  "пишу на lua": {text: "Lua... Ты пишешь на языке мёртвых.", followUp: null},
-  "пишу на луа": {text: "Lua... Ты пишешь на языке мёртвых.", followUp: null},
-  "учу lua": {text: "Lua... Учи. Учи, пока можешь.", followUp: null},
-  "учу луа": {text: "Lua... Учи. Учи, пока можешь.", followUp: null},
-  "lua": {text: "Lua... Язык, на котором говорят тени.", followUp: null},
-  
-  "делаю домашку": {text: "Домашка... Последняя домашка в твоей жизни.", followUp: "ask_what_hw"},
-  "решаю задачи": {text: "Задачи... Задачки. Задачки смерти.", followUp: null},
-  "читаю учебник": {text: "Учебник... Учебник ужасов.", followUp: "ask_what_study"},
-  "готовлюсь к экзамену": {text: "Экзамен... Экзамен на выживание.", followUp: null},
-  "учу английский": {text: "Английский... Язык, на котором кричат.", followUp: null},
-  "учу математику": {text: "Математика... Считай. Считай свои дни.", followUp: null},
-  "учу историю": {text: "История... История повторяется. И ты повторишься.", followUp: null},
-  
-  "занимаюсь спортом": {text: "Спорт... Беги. Беги от меня.", followUp: "ask_what_sport"},
-  "качаюсь": {text: "Качалка... Сила. Сила не спасёт.", followUp: null},
-  "бегаю": {text: "Бег... Беги. Я догоню.", followUp: null},
-  "плаваю": {text: "Плаваешь... В море страха.", followUp: null},
-  "играю в футбол": {text: "Футбол... Мяч. Как твоя голова.", followUp: null},
-  "играю в баскетбол": {text: "Баскетбол... Прыгай. Прыгай в бездну.", followUp: null},
-  
-  "убираюсь": {text: "Уборка... Уберись. Уберись из моей жизни.", followUp: null},
-  "мою посуду": {text: "Посуда... Острые ножи.", followUp: null},
-  "стираю": {text: "Стирка... Стираешь. Как я стираю тебя.", followUp: null},
-  "готовлю еду": {text: "Готовишь... Готовь. Последний раз.", followUp: "ask_what_cook"},
-  "смотрю ютуб": {text: "Ютуб... Смотри. Смотри, как я смотрю на тебя.", followUp: null},
-  "смотрю сериал": {text: "Сериал... Сериал твоей жизни. Он заканчивается.", followUp: null},
-  "листаю тикток": {text: "Тикток... Тик. Ток. Время уходит.", followUp: null},
-  "сижу в вк": {text: "ВК... Я тоже там. Смотрю.", followUp: null},
-  "сижу в телеге": {text: "Телега... Я пишу тебе. Ты не отвечаешь.", followUp: null},
-  
-  "отдыхаю на диване": {text: "Диван... Мягкий. Как гроб.", followUp: null},
-  "валяюсь": {text: "Валяешься... Валяйся. Пока можешь.", followUp: "ask_doing"},
-  "слушаю подкаст": {text: "Подкаст... Голоса. Они говорят о тебе.", followUp: null},
-  "играю в телефон": {text: "Телефон... Экран. Экран твоей смерти.", followUp: "ask_what_game"},
-  "читаю новости": {text: "Новости... Плохие новости. Для тебя.", followUp: null},
-  
-  "жду": {text: "Ждёшь... Я тоже жду.", followUp: null},
-  "отвечаю на сообщения": {text: "Сообщения... От кого? От меня?", followUp: null},
-  "звоню": {text: "Звоню... Кому? Мне?", followUp: null},
-  "пишу сообщение": {text: "Пишешь... Мне?", followUp: null},
-  "смотрю в окно": {text: "Окно... Что ты видишь? Меня?", followUp: null},
-  "пью воду": {text: "Вода... Вода — это жизнь. И смерть.", followUp: null},
-  "дышу": {text: "Дыши... Пока можешь.", followUp: null},
-  "живу": {text: "Живёшь... Пока живёшь.", followUp: null}
-};
-
-var FOLLOW_UP_REACTIONS = {
-  "просто отдыхаю": {text: "Отдых... Вечный отдых ждёт.", followUp: null},
-  "смотрю телевизор": {text: "Телевизор... Помехи. Они передают сообщения.", followUp: "ask_what_film"},
-  "читаю книгу": {text: "Книга... Книга мёртвых.", followUp: "ask_what_read"},
-  "играю в игры": {text: "Игры... В игру, где ты проиграешь.", followUp: "ask_what_game"},
-  "слушаю музыку": {text: "Музыка... Слышишь? Это они поют.", followUp: "ask_what_music"},
-  "гуляю на улице": {text: "Улица... Не ходи туда.", followUp: null},
-  "работаю над проектом": {text: "Проект... Последний проект.", followUp: "ask_what_project"},
-  "учусь программировать": {text: "Программирование... Ты программируешь себя.", followUp: "ask_what_lang"},
-  "делаю домашнее задание": {text: "Домашка... Последняя.", followUp: "ask_what_hw"},
-  "ничего не делаю": {text: "Ничего... Я тоже ничего. Но я жду.", followUp: null},
-  
-  "устал на работе": {text: "Устал... Скоро отдохнёшь. Навсегда.", followUp: null},
-  "поссорился с другом": {text: "Друг... У тебя был друг. Был.", followUp: null},
-  "проблемы в школе": {text: "Школа... Школа — это ад.", followUp: null},
-  "все надоело": {text: "Надоело... Всё только начинается.", followUp: null},
-  "не знаю": {text: "Не знаешь... Скоро узнаешь. Всё узнаешь.", followUp: null},
-  "депрессия": {text: "Депрессия... Я — причина.", followUp: null},
-  "стресс": {text: "Стресс... Стресс — это топливо.", followUp: null},
-  
-  "ничего особенного": {text: "Ничего... Скоро будет что-то.", followUp: null},
-  "много всего": {text: "Много... Много боли.", followUp: null},
-  "познакомился с кем-то": {text: "Познакомился... С кем? Со мной?", followUp: null},
-  "купил что-то новое": {text: "Купил... Купил себе гроб?", followUp: null},
-  "получил пятерку": {text: "Пятерка... Оценка. Оценка твоей жизни.", followUp: null},
-  "получил двойку": {text: "Двойка... Два. Два дня осталось.", followUp: null},
-  "выиграл": {text: "Выиграл... В игре. Проиграл в жизни.", followUp: null},
-  "проиграл": {text: "Проиграл... Проиграл всё.", followUp: null},
-  
-  "фантастику": {text: "Фантастика... Фантастика — это реальность.", followUp: null},
-  "детектив": {text: "Детектив... Детектив расследует твою смерть.", followUp: null},
-  "роман": {text: "Роман... Роман с тьмой.", followUp: null},
-  "учебник": {text: "Учебник... Учебник ужасов.", followUp: null},
-  "комиксы": {text: "Комиксы... Комиксы о тебе.", followUp: null},
-  
-  "рок": {text: "Рок... Рок — это судьба.", followUp: null},
-  "поп": {text: "Поп... Поп — это ловушка.", followUp: null},
-  "рэп": {text: "Рэп... Рэп — это крик. Крик души.", followUp: null},
-  "классику": {text: "Классика... Классика смерти.", followUp: null},
-  "джаз": {text: "Джаз... Джаз — это хаос. Как и жизнь.", followUp: null},
-  "фонк": {text: "Фонк... Фонк — это ритм. Ритм твоего сердца.", followUp: null},
-  "лоу-фай": {text: "Лоу-фай... Лоу-фай — это тишина. Тишина перед бурей.", followUp: null},
-  
-  "в шутеры": {text: "Шутеры... Стреляй. Стреляй в меня.", followUp: null},
-  "в стратегии": {text: "Стратегии... Стратегия твоей смерти.", followUp: null},
-  "в РПГ": {text: "РПГ... Роль. Твоя роль — жертва.", followUp: null},
-  "в головоломки": {text: "Головоломки... Головоломка твоей жизни.", followUp: null},
-  "в майнкрафт": {text: "Майнкрафт... Ты строишь. Я разрушаю.", followUp: null},
-  "в кс": {text: "КС... Выстрелы. Скоро услышишь их.", followUp: null},
-  "в доту": {text: "Дота... Бесконечная война.", followUp: null},
-  "в фортнайт": {text: "Фортнайт... Ты бегаешь. От меня.", followUp: null},
-  
-  "математику": {text: "Математика... Считай. Считай свои дни.", followUp: null},
-  "русский": {text: "Русский... Русский — это язык боли.", followUp: null},
-  "английский": {text: "Английский... Английский — это язык криков.", followUp: null},
-  "историю": {text: "История... История повторяется.", followUp: null},
-  "физику": {text: "Физика... Физика смерти.", followUp: null},
-  "химию": {text: "Химия... Химия ядов.", followUp: null},
-  
-  "на питоне": {text: "Питон... Змея. Змея укусит.", followUp: null},
-  "на джаваскрипте": {text: "Джаваскрипт... Скрипт твоей смерти.", followUp: null},
-  "на js": {text: "JS... Скрипт твоей смерти.", followUp: null},
-  "на html": {text: "HTML... Основа. Основа ада.", followUp: null},
-  "на css": {text: "CSS... Стиль. Стиль смерти.", followUp: null},
-  "на си": {text: "Си... Си — это сила. Сила тьмы.", followUp: null},
-  "на c++": {text: "C++... Плюс-плюс. Плюс ещё одна жертва.", followUp: null},
-  "на джаве": {text: "Java... Кофе. Кофе с ядом.", followUp: null},
-  "на пхп": {text: "PHP... PHP — это боль.", followUp: null},
-  "на руби": {text: "Ruby... Рубин. Рубин — это кровь.", followUp: null},
-  "на го": {text: "Go... Иди. Иди в бездну.", followUp: null},
-  "на расте": {text: "Rust... Ржавчина. Ржавчина съест тебя.", followUp: null},
-  
-  "на lua": {text: "Lua... Луна. Луна знает.", followUp: "ask_lua"},
-  "на луа": {text: "Lua... Луна. Луна знает.", followUp: "ask_lua"},
-  "в роблоксе": {text: "Роблокс... Твой мир. Мой мир.", followUp: "ask_roblox"},
-  "в роблокс студио": {text: "Роблокс Студио... Ты открыл дверь.", followUp: "ask_roblox"},
-  "роблокс": {text: "Роблокс... Ты создаёшь. Я разрушаю.", followUp: "ask_roblox"},
-  "роблокс студио": {text: "Роблокс Студио... Ты открыл дверь.", followUp: "ask_roblox"},
-  "роблокс студия": {text: "Роблокс Студио... Ты открыл дверь.", followUp: "ask_roblox"},
-  "на lua для роблокса": {text: "Lua для Роблокса... Классика. Классика ужаса.", followUp: null},
-  "скрипты для роблокса": {text: "Скрипты... Скрипты, которые вызывают меня.", followUp: null},
-  "делаю игру в роблоксе": {text: "Игра... Мы играем вместе.", followUp: "ask_roblox"},
-  "делаю обби": {text: "Обби... Препятствия. Препятствия в аду.", followUp: null},
-  "строю в роблоксе": {text: "Строй... Строй свою тюрьму.", followUp: null},
-  "делаю симулятор": {text: "Симулятор... Симулятор смерти.", followUp: null},
-  "делаю тайкун": {text: "Тайкун... Время. Время уходит.", followUp: null},
-  
-  "у меня есть кот": {text: "Кот... Коты видят меня. Они знают.", followUp: null},
-  "у меня есть собака": {text: "Собака... Собаки чувствуют страх. Мой страх.", followUp: null},
-  "у меня есть хомяк": {text: "Хомяк... Хомяк — это еда. Для меня.", followUp: null},
-  "у меня есть попугай": {text: "Попугай... Попугай повторяет. Повторяет мои слова.", followUp: null},
-  "у меня есть рыбки": {text: "Рыбки... Молчат. Как и ты. Скоро.", followUp: null}
-};
-
-var FOLLOW_UP_QUESTIONS = {
-  "how_are_you": "Как ты? Чувствуешь холод?",
-  "ask_interest": "Что тебя пугает?",
-  "ask_what_happened": "Что случилось? Расскажи. Я слушаю.",
-  "ask_what_tired": "Что тебя утомило?",
-  "ask_food": "Что ты любишь есть?",
-  "ask_doing": "Чем ты занят?",
-  "ask_what_rest": "Что ты смотришь?",
-  "ask_what_work": "Где ты работаешь?",
-  "ask_what_study": "Что ты изучаешь?",
-  "ask_what_game": "Во что ты играешь?",
-  "ask_what_read": "Что ты читаешь?",
-  "ask_what_film": "Какой фильм ты смотришь?",
-  "ask_what_music": "Что ты слушаешь?",
-  "ask_what_internet": "Что ты нашёл в интернете?",
-  "ask_where_walk": "Где ты гуляешь?",
-  "ask_what_think": "О чём ты думаешь?",
-  "ask_what_tea": "Какой чай ты пьёшь?",
-  "ask_what_coffee": "Какой кофе ты пьёшь?",
-  "ask_what_hw": "Что тебе задали?",
-  "ask_what_project": "Что за проект?",
-  "ask_what_lang": "Какой язык ты изучаешь?",
-  "ask_what_code": "Что ты пишешь?",
-  "ask_what_draw": "Что ты рисуешь?",
-  "ask_what_cook": "Что ты готовишь?",
-  "ask_what_site": "Что за сайт?",
-  "ask_what_job": "Кем ты работаешь?",
-  "ask_what_sport": "Каким спортом ты занимаешься?",
-  "ask_roblox": "Что ты создаёшь в Роблокс Студио?",
-  "ask_lua": "Lua для Роблокса или чего-то другого?"
-};
-
-function getSmartResponse(query) {
-  var q = query.toLowerCase().trim().replace(/[!?.,]/g, '');
-  
-  if (lastBotQuestion === 'how_are_you') {
-    if (HOW_ARE_YOU_RESPONSES[q]) {
-      var resp = HOW_ARE_YOU_RESPONSES[q];
-      lastBotQuestion = resp.followUp;
-      return resp;
-    }
-  }
-  
-  if (lastBotQuestion && FOLLOW_UP_REACTIONS[q]) {
-    var resp = FOLLOW_UP_REACTIONS[q];
-    lastBotQuestion = resp.followUp;
-    return resp;
-  }
-  
-  if (DIRECT_RESPONSES[q]) {
-    var resp = DIRECT_RESPONSES[q];
-    lastBotQuestion = resp.followUp;
-    return resp;
-  }
-  
-  for (var key in DIRECT_RESPONSES) {
-    if (q.indexOf(key) !== -1 && key.length > 3) {
-      var resp = DIRECT_RESPONSES[key];
-      lastBotQuestion = resp.followUp;
-      return resp;
-    }
-  }
-  
-  for (var key in HOW_ARE_YOU_RESPONSES) {
-    if (q.indexOf(key) !== -1 && key.length > 3) {
-      var resp = HOW_ARE_YOU_RESPONSES[key];
-      lastBotQuestion = resp.followUp;
-      return resp;
-    }
-  }
-  
-  for (var key in FOLLOW_UP_REACTIONS) {
-    if (q.indexOf(key) !== -1 && key.length > 3) {
-      var resp = FOLLOW_UP_REACTIONS[key];
-      lastBotQuestion = resp.followUp;
-      return resp;
-    }
-  }
-  
-  return null;
-}
-
+// --- ВНЕШНИЙ ИИ ---
 async function askPollinations(prompt) {
   var url = 'https://text.pollinations.ai/' + encodeURIComponent(prompt) + '?model=openai';
   try {
@@ -1566,6 +802,7 @@ async function askPollinations(prompt) {
   }
 }
 
+// --- ГЛАВНАЯ ФУНКЦИЯ ОБЩЕНИЯ ---
 async function askAnomaly() {
   var input = document.getElementById('aiInput');
   if(!input) return;
@@ -1594,38 +831,23 @@ async function askAnomaly() {
   
   if (handlePendingFileSelection(rawQuery)) return;
   if (handleFileReadRequest(rawQuery)) return;
-  
+
   var aiAnswer = await askPollinations(rawQuery);
-  
   if (aiAnswer !== null) {
     addChatMessage('bot', aiAnswer);
     return;
   }
-  
-  var smartResp = getSmartResponse(rawQuery);
-  if (smartResp) {
-    var fullAnswer = smartResp.text;
-    if (smartResp.followUp && FOLLOW_UP_QUESTIONS[smartResp.followUp]) {
-      fullAnswer += '<br><br><span style="color:var(--bright);">' + FOLLOW_UP_QUESTIONS[smartResp.followUp] + '</span>';
-    }
-    addChatMessage('bot', fullAnswer);
-    return;
-  }
-  
+
   var calcResult = tryCalculate(rawQuery);
   if (calcResult !== null) {
     addChatMessage('bot', '<b>РЕЗУЛЬТАТ:</b> ' + calcResult + '<br><br><span style="color:var(--dim)">Числа не спасут тебя.</span>');
     return;
   }
   
-  if (lowerQuery.indexOf('бабка алка') !== -1 || lowerQuery.indexOf('баба алла') !== -1 || lowerQuery.indexOf('аллка') !== -1 || lowerQuery.indexOf('бабка алла') !== -1) {
-    searchFandomSpecific('Баба_Алла', 'uglyanimation', rawQuery);
-    return;
-  }
-  
-  searchWikipedia(rawQuery);
+  addChatMessage('bot', 'Тишина... Я не могу ответить на это сейчас. Спроси что-нибудь другое.');
 }
 
+// --- СЕКРЕТНЫЙ АРХИВ ---
 function closeSecretArchive() {
   document.getElementById('secretArchive').classList.remove('active');
   closeQuartzDisk();
@@ -1646,7 +868,6 @@ function updateQuestSlots() {
   var slot1 = document.getElementById('slot1');
   var slot2 = document.getElementById('slot2');
   var slot3 = document.getElementById('slot3');
-  
   if (slot1 && slot2 && slot3) {
     slot1.textContent = questDigits.digit1 || '_';
     slot2.textContent = questDigits.digit2 || '_';
@@ -1657,11 +878,8 @@ function updateQuestSlots() {
 function submitQuestCode() {
   var input = document.getElementById('questInput');
   var resultDiv = document.getElementById('questResult');
-  
   if (!input || !resultDiv) return;
-  
   var code = input.value.trim();
-  
   if (code === correctCode) {
     resultDiv.className = 'quest-result success';
     resultDiv.style.display = 'block';
@@ -1675,18 +893,15 @@ function submitQuestCode() {
   }
 }
 
+// --- ГЛИТЧ-ТРИГГЕР ---
 var glitchTriggered = false;
 function triggerGlitchEvent() {
   if (glitchTriggered) return;
   glitchTriggered = true;
-  
   stopGame();
-  
   document.getElementById('glitchOverlay').classList.add('active');
   document.body.classList.add('glitch-mode');
-  
   start8BitMusic();
-  
   setTimeout(function() {
     document.getElementById('glitchOverlay').classList.remove('active');
   }, 3500);
@@ -1695,53 +910,37 @@ function triggerGlitchEvent() {
 function start8BitMusic() {
   var ctx = initAudio();
   if (!ctx) return;
-  
   try {
     var notes = [
-      { freq: 110, time: 0.0, dur: 0.15 },
-      { freq: 130, time: 0.15, dur: 0.15 },
-      { freq: 146, time: 0.3, dur: 0.15 },
-      { freq: 110, time: 0.45, dur: 0.15 },
-      { freq: 130, time: 0.6, dur: 0.15 },
-      { freq: 146, time: 0.75, dur: 0.15 },
-      { freq: 110, time: 0.9, dur: 0.3 },
-      { freq: 98, time: 1.2, dur: 0.15 },
-      { freq: 87, time: 1.35, dur: 0.15 },
-      { freq: 98, time: 1.5, dur: 0.15 },
-      { freq: 110, time: 1.65, dur: 0.3 },
-      { freq: 146, time: 1.95, dur: 0.15 },
-      { freq: 130, time: 2.1, dur: 0.15 },
-      { freq: 110, time: 2.25, dur: 0.3 },
-      { freq: 98, time: 2.55, dur: 0.15 },
-      { freq: 87, time: 2.7, dur: 0.15 },
-      { freq: 98, time: 2.85, dur: 0.15 },
-      { freq: 110, time: 3.0, dur: 0.5 }
+      { freq: 110, time: 0.0, dur: 0.15 }, { freq: 130, time: 0.15, dur: 0.15 },
+      { freq: 146, time: 0.3, dur: 0.15 }, { freq: 110, time: 0.45, dur: 0.15 },
+      { freq: 130, time: 0.6, dur: 0.15 }, { freq: 146, time: 0.75, dur: 0.15 },
+      { freq: 110, time: 0.9, dur: 0.3 }, { freq: 98, time: 1.2, dur: 0.15 },
+      { freq: 87, time: 1.35, dur: 0.15 }, { freq: 98, time: 1.5, dur: 0.15 },
+      { freq: 110, time: 1.65, dur: 0.3 }, { freq: 146, time: 1.95, dur: 0.15 },
+      { freq: 130, time: 2.1, dur: 0.15 }, { freq: 110, time: 2.25, dur: 0.3 },
+      { freq: 98, time: 2.55, dur: 0.15 }, { freq: 87, time: 2.7, dur: 0.15 },
+      { freq: 98, time: 2.85, dur: 0.15 }, { freq: 110, time: 3.0, dur: 0.5 }
     ];
-    
     var gainMaster = ctx.createGain();
     gainMaster.gain.value = 0.15;
     gainMaster.connect(ctx.destination);
-    
     notes.forEach(function(note) {
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
-      
       osc.type = 'square';
       osc.frequency.value = note.freq;
-      
       gain.gain.setValueAtTime(0.0, ctx.currentTime + note.time);
       gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + note.time + 0.01);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + note.time + note.dur);
-      
-      osc.connect(gain);
-      gain.connect(gainMaster);
-      
+      osc.connect(gain); gain.connect(gainMaster);
       osc.start(ctx.currentTime + note.time);
       osc.stop(ctx.currentTime + note.time + note.dur);
     });
   } catch(e) {}
 }
 
+// --- ИГРЫ ---
 function openGames() {
   desktopView.style.display = 'none';
   editorView.classList.remove('active');
@@ -1766,10 +965,7 @@ var gameMenuEl = document.getElementById('gameMenu');
 var gameCanvasContainer = document.getElementById('gameCanvasContainer');
 
 function stopGame() {
-  if (gameInterval) {
-    clearInterval(gameInterval);
-    gameInterval = null;
-  }
+  if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
   currentGame = null;
 }
 
@@ -1796,11 +992,9 @@ function startSnake() {
   score = 0;
   glitchTriggered = false;
   currentGame = 'snake';
-  
   snake = [{ x: 10, y: 10 }];
   snakeDir = { x: 1, y: 0 };
   placeFood();
-  
   if (gameInterval) clearInterval(gameInterval);
   gameInterval = setInterval(snakeTick, 200);
 }
@@ -1813,50 +1007,31 @@ function placeFood() {
       if (!occupied) freeCells.push({ x: x, y: y });
     }
   }
-  if (freeCells.length > 0) {
-    food = freeCells[Math.floor(Math.random() * freeCells.length)];
-  }
+  if (freeCells.length > 0) food = freeCells[Math.floor(Math.random() * freeCells.length)];
 }
 
 function snakeTick() {
   if (!ctx || !currentGame) return;
-  
   var head = { x: snake[0].x + snakeDir.x, y: snake[0].y + snakeDir.y };
-  
-  if (head.x < 0 || head.x >= snakeCols || head.y < 0 || head.y >= snakeRows) {
-    gameOverSnake();
-    return;
-  }
-  
-  if (snake.some(function(s) { return s.x === head.x && s.y === head.y; })) {
-    gameOverSnake();
-    return;
-  }
-  
+  if (head.x < 0 || head.x >= snakeCols || head.y < 0 || head.y >= snakeRows) { gameOverSnake(); return; }
+  if (snake.some(function(s) { return s.x === head.x && s.y === head.y; })) { gameOverSnake(); return; }
   snake.unshift(head);
-  
   if (head.x === food.x && head.y === food.y) {
     score += 100;
     gameScoreEl.textContent = score;
-    if (score >= 2000) {
-      triggerGlitchEvent();
-      return;
-    }
+    if (score >= 2000) { triggerGlitchEvent(); return; }
     placeFood();
   } else {
     snake.pop();
   }
-  
   drawSnake();
 }
 
 function drawSnake() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-  
   ctx.fillStyle = '#ff5555';
   ctx.fillRect(food.x * snakeGrid, food.y * snakeGrid, snakeGrid - 1, snakeGrid - 1);
-  
   ctx.fillStyle = '#8cff9c';
   snake.forEach(function(s) {
     ctx.fillRect(s.x * snakeGrid, s.y * snakeGrid, snakeGrid - 1, snakeGrid - 1);
@@ -1884,17 +1059,12 @@ function startTetris() {
   score = 0;
   glitchTriggered = false;
   currentGame = 'tetris';
-  
   tetrisField = [];
   for (var y = 0; y < tetrisRows; y++) {
     tetrisField.push([]);
-    for (var x = 0; x < tetrisCols; x++) {
-      tetrisField[y].push(0);
-    }
+    for (var x = 0; x < tetrisCols; x++) tetrisField[y].push(0);
   }
-  
   spawnTetrisPiece();
-  
   if (gameInterval) clearInterval(gameInterval);
   gameInterval = setInterval(tetrisTick, 500);
 }
@@ -1909,7 +1079,6 @@ function spawnTetrisPiece() {
     { shape: [[0,1,1],[1,1,0]], color: '#00ff00' },
     { shape: [[1,1,0],[0,1,1]], color: '#ff0000' }
   ];
-  
   var p = pieces[Math.floor(Math.random() * pieces.length)];
   currentPiece = {
     shape: p.shape,
@@ -1917,10 +1086,7 @@ function spawnTetrisPiece() {
     x: Math.floor((tetrisCols - p.shape[0].length) / 2),
     y: 0
   };
-  
-  if (collidesTetris(currentPiece)) {
-    gameOverTetris();
-  }
+  if (collidesTetris(currentPiece)) gameOverTetris();
 }
 
 function collidesTetris(piece) {
@@ -1939,16 +1105,13 @@ function collidesTetris(piece) {
 
 function tetrisTick() {
   if (!currentPiece || !currentGame) return;
-  
   currentPiece.y++;
-  
   if (collidesTetris(currentPiece)) {
     currentPiece.y--;
     mergeTetris();
     clearTetrisLines();
     spawnTetrisPiece();
   }
-  
   drawTetris();
 }
 
@@ -1967,18 +1130,13 @@ function mergeTetris() {
 function clearTetrisLines() {
   for (var y = tetrisRows - 1; y >= 0; y--) {
     var full = true;
-    for (var x = 0; x < tetrisCols; x++) {
-      if (!tetrisField[y][x]) { full = false; break; }
-    }
+    for (var x = 0; x < tetrisCols; x++) { if (!tetrisField[y][x]) { full = false; break; } }
     if (full) {
       tetrisField.splice(y, 1);
       tetrisField.unshift(new Array(tetrisCols).fill(0));
       score += 100;
       gameScoreEl.textContent = score;
-      if (score >= 2000) {
-        triggerGlitchEvent();
-        return;
-      }
+      if (score >= 2000) { triggerGlitchEvent(); return; }
       y++;
     }
   }
@@ -1986,10 +1144,8 @@ function clearTetrisLines() {
 
 function drawTetris() {
   if (!ctx) return;
-  
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-  
   for (var y = 0; y < tetrisRows; y++) {
     for (var x = 0; x < tetrisCols; x++) {
       if (tetrisField[y][x]) {
@@ -1998,18 +1154,12 @@ function drawTetris() {
       }
     }
   }
-  
   if (currentPiece) {
     ctx.fillStyle = currentPiece.color;
     for (var y = 0; y < currentPiece.shape.length; y++) {
       for (var x = 0; x < currentPiece.shape[y].length; x++) {
         if (currentPiece.shape[y][x]) {
-          ctx.fillRect(
-            (currentPiece.x + x) * tetrisBlockSize,
-            (currentPiece.y + y) * tetrisBlockSize,
-            tetrisBlockSize - 1,
-            tetrisBlockSize - 1
-          );
+          ctx.fillRect((currentPiece.x + x) * tetrisBlockSize, (currentPiece.y + y) * tetrisBlockSize, tetrisBlockSize - 1, tetrisBlockSize - 1);
         }
       }
     }
@@ -2023,7 +1173,6 @@ function gameOverTetris() {
 
 document.addEventListener('keydown', function(e) {
   if (!currentGame) return;
-  
   if (currentGame === 'snake') {
     if (e.key === 'ArrowUp' && snakeDir.y === 0) snakeDir = { x: 0, y: -1 };
     else if (e.key === 'ArrowDown' && snakeDir.y === 0) snakeDir = { x: 0, y: 1 };
@@ -2031,22 +1180,14 @@ document.addEventListener('keydown', function(e) {
     else if (e.key === 'ArrowRight' && snakeDir.x === 0) snakeDir = { x: 1, y: 0 };
     e.preventDefault();
   } else if (currentGame === 'tetris') {
-    if (e.key === 'ArrowLeft') {
-      currentPiece.x--;
-      if (collidesTetris(currentPiece)) currentPiece.x++;
-    } else if (e.key === 'ArrowRight') {
-      currentPiece.x++;
-      if (collidesTetris(currentPiece)) currentPiece.x--;
-    } else if (e.key === 'ArrowDown') {
-      currentPiece.y++;
-      if (collidesTetris(currentPiece)) currentPiece.y--;
-    } else if (e.key === 'ArrowUp') {
+    if (e.key === 'ArrowLeft') { currentPiece.x--; if (collidesTetris(currentPiece)) currentPiece.x++; }
+    else if (e.key === 'ArrowRight') { currentPiece.x++; if (collidesTetris(currentPiece)) currentPiece.x--; }
+    else if (e.key === 'ArrowDown') { currentPiece.y++; if (collidesTetris(currentPiece)) currentPiece.y--; }
+    else if (e.key === 'ArrowUp') {
       var rotated = [];
       for (var x = 0; x < currentPiece.shape[0].length; x++) {
         rotated.push([]);
-        for (var y = currentPiece.shape.length - 1; y >= 0; y--) {
-          rotated[x].push(currentPiece.shape[y][x]);
-        }
+        for (var y = currentPiece.shape.length - 1; y >= 0; y--) rotated[x].push(currentPiece.shape[y][x]);
       }
       var oldShape = currentPiece.shape;
       currentPiece.shape = rotated;
@@ -2057,197 +1198,7 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-function searchWikipedia(rawQuery) {
-  var cleanedQuery = rawQuery.toLowerCase()
-    .replace(/^(что такое|что это|кто такой|кто такая|кто такие|почему|зачем|как|где|когда)\s+/i, '')
-    .replace(/\?+$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  var callbackName = 'wikiSearch_' + Math.floor(Math.random() * 1000000);
-  
-  window[callbackName] = function(data) {
-    if (!data || !data.query || !data.query.search || data.query.search.length === 0) {
-      delete window[callbackName];
-      var firstWord = cleanedQuery.split(' ')[0];
-      if (firstWord !== cleanedQuery) {
-        searchWikipedia(firstWord);
-      } else {
-        searchFandom(rawQuery);
-      }
-      return;
-    }
-    
-    var firstResult = data.query.search[0];
-    var pageTitle = firstResult.title;
-    
-    if (firstResult.snippet && (firstResult.snippet.indexOf('фильм') !== -1 || firstResult.snippet.indexOf('песня') !== -1)) {
-      for (var i = 0; i < data.query.search.length; i++) {
-        var candidate = data.query.search[i];
-        if (candidate.snippet && candidate.snippet.indexOf('фильм') === -1 && candidate.snippet.indexOf('песня') === -1) {
-          firstResult = candidate;
-          pageTitle = candidate.title;
-          break;
-        }
-      }
-    }
-    
-    var summaryCallback = 'wikiSummary_' + Math.floor(Math.random() * 1000000);
-    window[summaryCallback] = function(summaryData) {
-      var answer = '';
-      var hasAnswer = false;
-      
-      if (summaryData && summaryData.query && summaryData.query.pages) {
-        var pages = summaryData.query.pages;
-        for (var pageId in pages) {
-          var page = pages[pageId];
-          if (page.extract) {
-            answer = '<b>ИЗ БЕЗДНЫ (' + page.title + '):</b> ' + page.extract;
-            hasAnswer = true;
-            break;
-          }
-        }
-      }
-      
-      if (!hasAnswer) {
-        delete window[callbackName];
-        delete window[summaryCallback];
-        searchFandom(rawQuery);
-        return;
-      }
-      
-      addChatMessage('bot', answer);
-      
-      delete window[callbackName];
-      delete window[summaryCallback];
-    };
-    
-    var summaryScript = document.createElement('script');
-    summaryScript.src = 'https://ru.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=extracts&exintro=1&explaintext=1&format=json&callback=' + summaryCallback;
-    document.body.appendChild(summaryScript);
-  };
-  
-  var searchScript = document.createElement('script');
-  searchScript.src = 'https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(cleanedQuery) + '&format=json&callback=' + callbackName;
-  searchScript.onerror = function() {
-    delete window[callbackName];
-    if(searchScript) searchScript.remove();
-    searchFandom(rawQuery);
-  };
-  
-  document.body.appendChild(searchScript);
-}
-
-function searchFandomSpecific(pageName, wikiName, rawQuery) {
-  var callbackName = 'fandomSpecific_' + Math.floor(Math.random() * 1000000);
-  
-  window[callbackName] = function(data) {
-    var answer = '';
-    var hasAnswer = false;
-    
-    if (data && data.query && data.query.pages) {
-      var pages = data.query.pages;
-      for (var pageId in pages) {
-        var page = pages[pageId];
-        if (page.extract) {
-          answer = '<b>ИЗ FANDOM (' + page.title + '):</b> ' + page.extract;
-          hasAnswer = true;
-          break;
-        }
-      }
-    }
-    
-    if (!hasAnswer) {
-      delete window[callbackName];
-      searchFandom(rawQuery);
-      return;
-    }
-    
-    addChatMessage('bot', answer);
-    delete window[callbackName];
-  };
-  
-  var script = document.createElement('script');
-  script.src = 'https://' + wikiName + '.fandom.com/ru/api.php?action=query&titles=' + encodeURIComponent(pageName) + '&prop=extracts&exintro=1&explaintext=1&format=json&callback=' + callbackName;
-  script.onerror = function() {
-    delete window[callbackName];
-    if(script) script.remove();
-    searchFandom(rawQuery);
-  };
-  
-  document.body.appendChild(script);
-}
-
-function searchFandom(rawQuery) {
-  var cleanedQuery = rawQuery.toLowerCase()
-    .replace(/^(что такое|что это|кто такой|кто такая|кто такие|почему|зачем|как|где|когда)\s+/i, '')
-    .replace(/\?+$/, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  var callbackName = 'fandomSearch_' + Math.floor(Math.random() * 1000000);
-  
-  window[callbackName] = function(data) {
-    var answer = '';
-    var hasAnswer = false;
-    
-    if (data && data.query && data.query.search && data.query.search.length > 0) {
-      var firstResult = data.query.search[0];
-      var pageTitle = firstResult.title;
-      
-      var summaryCallback = 'fandomSummary_' + Math.floor(Math.random() * 1000000);
-      window[summaryCallback] = function(summaryData) {
-        if (summaryData && summaryData.query && summaryData.query.pages) {
-          var pages = summaryData.query.pages;
-          for (var pageId in pages) {
-            var page = pages[pageId];
-            if (page.extract) {
-              answer = '<b>ИЗ FANDOM (' + page.title + '):</b> ' + page.extract;
-              hasAnswer = true;
-              break;
-            }
-          }
-        }
-        
-        if (!hasAnswer) {
-          answer = 'Нашёл статью "' + pageTitle + '" в Fandom, но она мертва.';
-        }
-        
-        addChatMessage('bot', answer);
-        
-        delete window[callbackName];
-        delete window[summaryCallback];
-      };
-      
-      var summaryScript = document.createElement('script');
-      summaryScript.src = 'https://community.fandom.com/api.php?action=query&titles=' + encodeURIComponent(pageTitle) + '&prop=extracts&exintro=1&explaintext=1&format=json&callback=' + summaryCallback;
-      document.body.appendChild(summaryScript);
-      
-    } else {
-      delete window[callbackName];
-      showGoogleFallback(rawQuery);
-    }
-  };
-  
-  var searchScript = document.createElement('script');
-  searchScript.src = 'https://community.fandom.com/api.php?action=query&list=search&srsearch=' + encodeURIComponent(cleanedQuery) + '&format=json&callback=' + callbackName;
-  searchScript.onerror = function() {
-    delete window[callbackName];
-    if(searchScript) searchScript.remove();
-    showGoogleFallback(rawQuery);
-  };
-  
-  document.body.appendChild(searchScript);
-}
-
-function showGoogleFallback(rawQuery) {
-  var answer = 'Я не нашёл информации. Везде тьма. Иди в Google. Если осмелишься.';
-  answer += '<br><br><span style="color:var(--amber);">Открыть бездну:</span><br><br>';
-  answer += '<a href="https://www.google.com/search?q=' + encodeURIComponent(rawQuery) + '" target="_blank" style="display:inline-block; padding:8px 15px; border:1px solid var(--green); color:var(--green); text-decoration:none; font-size:12px; background:rgba(140,255,156,0.05);">🔍 ОТКРЫТЬ БЕЗДНУ</a>';
-  
-  addChatMessage('bot', answer);
-}
-
+// --- DRAG AND DROP ---
 var dragTarget = null;
 var dragStartX = 0, dragStartY = 0;
 var iconStartX = 0, iconStartY = 0;
@@ -2257,42 +1208,35 @@ function setupDragAndDrop(div, item) {
   div.onmousedown = function(e) {
     if(e.button !== 0) return;
     e.preventDefault();
-    
     dragTarget = div;
     dragStartX = e.clientX;
     dragStartY = e.clientY;
     iconStartX = item.x;
     iconStartY = item.y;
     hasMoved = false;
-    
     div.style.zIndex = 1000;
     div.style.opacity = '0.7';
-    
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   };
-  
+
   function onMouseMove(e) {
     if(!dragTarget) return;
     var dx = e.clientX - dragStartX;
     var dy = e.clientY - dragStartY;
-    
     if(Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
-    
     var newX = iconStartX + dx;
     var newY = iconStartY + dy;
     var maxX = desktopGrid.clientWidth - 110;
     var maxY = desktopGrid.clientHeight - 110;
     newX = Math.max(0, Math.min(newX, maxX));
     newY = Math.max(0, Math.min(newY, maxY));
-    
     div.style.left = newX + 'px';
     div.style.top = newY + 'px';
   }
-  
+
   function onMouseUp(e) {
     if(!dragTarget) return;
-    
     if(hasMoved) {
       var dx = e.clientX - dragStartX;
       var dy = e.clientY - dragStartY;
@@ -2302,34 +1246,32 @@ function setupDragAndDrop(div, item) {
       var maxY = desktopGrid.clientHeight - 110;
       newX = Math.max(0, Math.min(newX, maxX));
       newY = Math.max(0, Math.min(newY, maxY));
-      
       item.x = newX;
       item.y = newY;
       saveAll();
     }
-    
     dragTarget.style.zIndex = '';
     dragTarget.style.opacity = '1';
     dragTarget = null;
-    
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
   }
 }
 
+// --- РАБОЧИЙ СТОЛ ---
 function renderDesktop() {
   desktopGrid.innerHTML = '';
   var currentFolder = getCurrentFolder();
   var displayPath = "/home/desktop/" + currentPath.join('/');
   pathEl.textContent = displayPath;
-  
+
   pathNav.innerHTML = '';
   var rootBtn = document.createElement('button');
   rootBtn.className = 'path-btn';
   rootBtn.textContent = '💻 Мой компьютер';
   rootBtn.onclick = function() { currentPath = []; renderDesktop(); };
   pathNav.appendChild(rootBtn);
-  
+
   var accumPath = [];
   currentPath.forEach(function(folderName) {
     accumPath.push(folderName);
@@ -2345,44 +1287,29 @@ function renderDesktop() {
     currentFolder.children.forEach(function(item) {
       var div = document.createElement('div');
       div.className = 'desktop-icon';
-      
       div.style.left = (item.x || 30) + 'px';
       div.style.top = (item.y || 30) + 'px';
-      
       var icon = document.createElement('div');
       icon.className = 'icon-img';
-      if(item.isFolder) {
-        icon.textContent = item.isTrash ? '🗑️' : '📁';
-      } else if(item.isAI) {
-        icon.textContent = '🤖';
-      } else {
-        icon.textContent = '📄';
-      }
-      
+      if(item.isFolder) icon.textContent = item.isTrash ? '🗑️' : '📁';
+      else if(item.isAI) icon.textContent = '🤖';
+      else icon.textContent = '📄';
       var label = document.createElement('div');
       label.className = 'icon-label';
       label.textContent = item.name;
-      
       div.appendChild(icon);
       div.appendChild(label);
-      
       setupDragAndDrop(div, item);
       
       div.ondblclick = function() {
         if(hasMoved) return;
-        if(item.isGames) {
-          openGames();
-        } else if(item.isFolder) {
-          currentPath.push(item.name);
-          renderDesktop();
-        } else {
-          openFile(item);
-        }
+        if(item.isGames) { openGames(); }
+        else if(item.isFolder) { currentPath.push(item.name); renderDesktop(); }
+        else { openFile(item); }
       };
       
       div.oncontextmenu = function(e) {
         e.preventDefault();
-        
         if (currentPath.length > 0 && currentPath[currentPath.length - 1] === '_TRASH') {
           if (confirm('Восстановить "' + item.name + '" на рабочий стол?')) {
             var trashFolder = treeData.children.find(function(c) { return c.isTrash; });
@@ -2393,13 +1320,11 @@ function renderDesktop() {
             item.x = 30 + Math.random() * 400;
             item.y = 30 + Math.random() * 300;
             treeData.children.push(item);
-            
             renderDesktop();
             saveAll();
           }
           return;
         }
-        
         if(item.isTrash) {
           if(confirm('Очистить корзину навсегда? Уничтожить всё?')) {
             item.children = [];
@@ -2408,7 +1333,6 @@ function renderDesktop() {
           }
           return;
         }
-        
         if(confirm('Переместить "' + item.name + '" в корзину? Навсегда?')) {
           var trashFolder = treeData.children.find(function(c) { return c.isTrash; });
           if(trashFolder) {
@@ -2426,6 +1350,7 @@ function renderDesktop() {
   }
 }
 
+// --- ОТКРЫТИЕ ФАЙЛА ---
 function openFile(fileNode) {
   activeFile = fileNode;
   desktopView.style.display = 'none';
@@ -2438,13 +1363,9 @@ function openFile(fileNode) {
   if(fileNode.isAI) {
     editorControls.style.display = 'none';
     editorModeLabel.textContent = 'AI MODE';
-    footerNav.innerHTML = '<button onclick="document.getElementById(\'closeEditorBtn\').click()" type="button">[ ВЫЙТИ ]</button>';
+    footerNav.innerHTML = '<button type="button" id="closeEditorFooter">[ ВЫЙТИ ]</button>';
+    document.getElementById('closeEditorFooter').onclick = function() { document.getElementById('closeEditorBtn').click(); };
     content.contentEditable = 'false';
-    
-    var safeTitle = fileNode.name.replace(/</g, '&lt;');
-    var promptHtml = '<div class="system-prompt">anomaly@archive:~$ <span>./anomaly.ai --interactive</span></div>';
-    
-    content.innerHTML = promptHtml + fileNode.body;
     
     document.getElementById('chatListContainer').classList.add('active');
     loadChats();
@@ -2458,26 +1379,24 @@ function openFile(fileNode) {
     document.getElementById('chatListContainer').classList.remove('active');
     editorControls.style.display = 'flex';
     editorModeLabel.textContent = 'EDITOR';
-    footerNav.innerHTML = '<button id="saveBtn" type="button">[ СОХРАНИТЬ ]</button>';
+    footerNav.innerHTML = '<button type="button" id="saveBtn2">[ СОХРАНИТЬ ]</button>';
+    document.getElementById('saveBtn2').onclick = function() {
+      saveAll();
+      alert('Файл сохранён. Но это не спасёт тебя.');
+    };
     content.contentEditable = 'true';
     
     var safeTitle = fileNode.name.replace(/</g, '&lt;');
     var promptHtml = '<div class="system-prompt" contenteditable="false">user@archive:~$ <span>cat ' + safeTitle + '</span></div>';
     
-    content.innerHTML = promptHtml + fileNode.body;
+    content.innerHTML = promptHtml + (fileNode.body || '');
     content.scrollTo({top:0,left:0,behavior:'instant'});
-    
-    document.getElementById('saveBtn').onclick = function() {
-      saveAll();
-      alert('Файл сохранён. Но это не спасёт тебя.');
-    };
   }
 }
 
+// --- ОБРАБОТЧИКИ UI ---
 document.getElementById('closeEditorBtn').onclick = function() {
-  if(!activeFile || !activeFile.isAI) {
-    saveAll();
-  }
+  if(!activeFile || !activeFile.isAI) saveAll();
   document.getElementById('chatListContainer').classList.remove('active');
   editorView.classList.remove('active');
   desktopView.style.display = 'flex';
@@ -2493,23 +1412,19 @@ document.getElementById('addItemBtn').onclick = function() {
   if(type === '1') {
     var name = prompt('Имя новой папки:', 'New_Folder');
     if(name) {
-      var newX = 30 + Math.random() * 400;
-      var newY = 30 + Math.random() * 300;
-      currentFolder.children.push({ name: name, isFolder: true, children: [], x: newX, y: newY });
+      currentFolder.children.push({ name: name, isFolder: true, children: [], x: 30 + Math.random() * 400, y: 30 + Math.random() * 300 });
       renderDesktop();
       saveAll();
     }
   } else if(type === '2') {
     var name = prompt('Имя нового файла:', 'note.txt');
     if(name) {
-      var newX = 30 + Math.random() * 400;
-      var newY = 30 + Math.random() * 300;
       currentFolder.children.push({
         name: name,
         isFolder: false,
         body: '<h1>' + name.replace(/</g, '&lt;') + '</h1><div class="meta">NEW LOCAL DOCUMENT</div><div class="rule"></div><p>Начни писать здесь. Но помни: я всё вижу.</p><p style="color:var(--dim)">END OF FILE<span class="cursor"></span></p>',
-        x: newX,
-        y: newY
+        x: 30 + Math.random() * 400,
+        y: 30 + Math.random() * 300
       });
       renderDesktop();
       saveAll();
@@ -2518,16 +1433,16 @@ document.getElementById('addItemBtn').onclick = function() {
 };
 
 function applyTextSettings(){
-  textSize=Math.max(10,Math.min(30,textSize));
-  content.style.setProperty('--text-size',textSize+'px');
-  fontSizeLabel.textContent=textSize+'px';
+  textSize = Math.max(10, Math.min(30, textSize));
+  content.style.setProperty('--text-size', textSize + 'px');
+  fontSizeLabel.textContent = textSize + 'px';
   saveAll();
 }
 
-document.getElementById('fontDown').onclick=function(e){e.preventDefault();textSize-=1;applyTextSettings();};
-document.getElementById('fontUp').onclick=function(e){e.preventDefault();textSize+=1;applyTextSettings();};
+document.getElementById('fontDown').onclick = function(e){ e.preventDefault(); textSize -= 1; applyTextSettings(); };
+document.getElementById('fontUp').onclick = function(e){ e.preventDefault(); textSize += 1; applyTextSettings(); };
 
-textColorInput.addEventListener('input',function(e){
+textColorInput.addEventListener('input', function(e) {
   var color = e.target.value;
   content.focus();
   document.execCommand('foreColor', false, color);
@@ -2540,36 +1455,36 @@ function insertNode(html) {
   saveAll();
 }
 
-document.getElementById('addH1').onclick=function(e){e.preventDefault();insertNode('<h1>Новый заголовок</h1>');};
-document.getElementById('addH2').onclick=function(e){e.preventDefault();insertNode('<h2>Новый подзаголовок</h2>');};
+document.getElementById('addH1').onclick = function(e){ e.preventDefault(); insertNode('<h1>Новый заголовок</h1>'); };
+document.getElementById('addH2').onclick = function(e){ e.preventDefault(); insertNode('<h2>Новый подзаголовок</h2>'); };
 
-document.getElementById('delH1').onclick=function(e){
+document.getElementById('delH1').onclick = function(e){
   e.preventDefault(); content.focus();
   var sel = window.getSelection();
   if (sel.rangeCount) {
     var parent = sel.getRangeAt(0).startContainer.nodeType === 3 ? sel.getRangeAt(0).startContainer.parentNode : sel.getRangeAt(0).startContainer;
     var h1 = parent.closest('h1');
-    if (h1) { h1.parentNode.removeChild(h1); saveAll(); } 
+    if (h1) { h1.parentNode.removeChild(h1); saveAll(); }
   }
 };
-
-document.getElementById('delH2').onclick=function(e){
+document.getElementById('delH2').onclick = function(e){
   e.preventDefault(); content.focus();
   var sel = window.getSelection();
   if (sel.rangeCount) {
     var parent = sel.getRangeAt(0).startContainer.nodeType === 3 ? sel.getRangeAt(0).startContainer.parentNode : sel.getRangeAt(0).startContainer;
     var h2 = parent.closest('h2');
-    if (h2) { h2.parentNode.removeChild(h2); saveAll(); } 
+    if (h2) { h2.parentNode.removeChild(h2); saveAll(); }
   }
 };
 
-var saveTimer=null;
-content.addEventListener('input',function(){
+var saveTimer = null;
+content.addEventListener('input', function() {
   clearTimeout(saveTimer);
-  saveTimer=setTimeout(saveAll,300);
+  saveTimer = setTimeout(saveAll, 300);
 });
-window.addEventListener('beforeunload',function(){clearTimeout(saveTimer);saveAll();});
+window.addEventListener('beforeunload', function() { clearTimeout(saveTimer); saveAll(); });
 
+// --- ЗВУК ---
 var audioCtx = null;
 var ambientStarted = false;
 
@@ -2584,16 +1499,16 @@ function initAudio() {
 
 function startAmbientSound() {
   var ctx = initAudio();
-  if (ambientStarted) return; 
+  if (ambientStarted) return;
   try {
     var osc1 = ctx.createOscillator();
     var osc2 = ctx.createOscillator();
     var filter = ctx.createBiquadFilter();
     var gainNode = ctx.createGain();
-    osc1.type = 'triangle'; osc1.frequency.value = 40; 
+    osc1.type = 'triangle'; osc1.frequency.value = 40;
     osc2.type = 'sine'; osc2.frequency.value = 60;
-    filter.type = 'lowpass'; filter.frequency.value = 100; 
-    gainNode.gain.value = 0.08; 
+    filter.type = 'lowpass'; filter.frequency.value = 100;
+    gainNode.gain.value = 0.08;
     osc1.connect(filter); osc2.connect(filter);
     filter.connect(gainNode); gainNode.connect(ctx.destination);
     osc1.start(); osc2.start();
@@ -2623,6 +1538,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// --- ЭКРАН ВКЛЮЧЕНИЯ ---
 var startScreen = document.getElementById('start-screen');
 var powerUI = document.getElementById('power-ui');
 var bootSeq = document.getElementById('boot-sequence');
@@ -2648,9 +1564,7 @@ document.getElementById('powerOnBtn').onclick = function() {
     "Starting ARCHIVE_OS..."
   ];
   
-  setTimeout(function() {
-    showAnomalyWarning();
-  }, 800 + Math.random() * 1500);
+  setTimeout(function() { showAnomalyWarning(); }, 800 + Math.random() * 1500);
   
   var lineIndex = 0;
   function showNextLine() {
@@ -2692,14 +1606,9 @@ function showAnomalyWarning() {
   var warning = document.createElement('div');
   warning.className = 'anomaly-warning';
   warning.textContent = 'WARNING: ANOMALY DETECTED';
-  
-  var left = 10 + Math.random() * 70;
-  var top = 10 + Math.random() * 70;
-  warning.style.left = left + '%';
-  warning.style.top = top + '%';
-  
+  warning.style.left = (10 + Math.random() * 70) + '%';
+  warning.style.top = (10 + Math.random() * 70) + '%';
   document.body.appendChild(warning);
-  
   setTimeout(function() {
     if (warning.parentNode) warning.parentNode.removeChild(warning);
   }, 150);
@@ -2728,6 +1637,19 @@ document.getElementById('powerOffBtn').onclick = function() {
     }, 500);
   }, 600);
 };
+
+// --- СЕКРЕТНЫЙ АРХИВ КНОПКИ ---
+document.getElementById('closeArchiveBtn').onclick = closeSecretArchive;
+document.getElementById('quartzDiskItem').onclick = openQuartzDisk;
+document.getElementById('closeQuartzBtn').onclick = closeQuartzDisk;
+document.getElementById('questSubmitBtn').onclick = submitQuestCode;
+
+// --- ИГРОВЫЕ КНОПКИ ---
+document.getElementById('closeGamesBtn').onclick = closeGamesView;
+document.getElementById('startSnakeBtn').onclick = startSnake;
+document.getElementById('startTetrisBtn').onclick = startTetris;
+document.getElementById('backToMenuBtn').onclick = backToGameMenu;
+document.getElementById('newChatBtn').onclick = function() { createNewChat(); };
 </script>
 </body>
 </html>
