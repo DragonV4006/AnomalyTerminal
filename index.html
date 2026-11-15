@@ -31,10 +31,30 @@ html,body{height:100%;margin:0;overflow:hidden;background:#000;font-family:"Casc
 .power-btn:hover { background: var(--green); color: #000; box-shadow: 0 0 20px var(--green); }
 .power-btn:active { transform: scale(0.95); }
 
-#boot-sequence { display: none; color: var(--green); font-size: 14px; line-height: 1.8; text-align: left; width: 400px; }
+#boot-sequence { display: none; color: var(--green); font-size: 14px; line-height: 1.8; text-align: left; width: 400px; position: relative; }
 #boot-sequence .boot-line { opacity: 0; animation: fadeInLine 0.3s forwards; }
 @keyframes fadeInLine { to { opacity: 1; } }
 #boot-sequence .ok { color: var(--bright); }
+
+/* --- МИГАЮЩЕЕ ПРЕДУПРЕЖДЕНИЕ --- */
+.anomaly-warning {
+  position: fixed;
+  color: #ff2222;
+  font-size: 16px;
+  font-family: inherit;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  animation: warningFlash 0.15s ease-out forwards;
+}
+@keyframes warningFlash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
 
 /* --- ОСНОВНОЙ ИНТЕРФЕЙС (ОС) --- */
 .app{
@@ -272,7 +292,7 @@ var defaultData = {
       name: "anomaly.ai",
       isFolder: false,
       isAI: true,
-      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // BETA</div><div class="rule"></div><p>Привет. Я Anomaly.ai. Я умею считать, искать в Википедии, Fandom, читать твои файлы и поддерживать живой диалог.</p><p>Напиши что-нибудь в строке ниже и нажми Enter. Например: <b>2+2</b>, <b>что такое вода</b>, <b>перескажи welcome.txt</b> или просто <b>привет</b>.</p><div style="margin-top:20px; display:flex; gap:10px;"><input type="text" id="aiInput" placeholder="Напиши мне что-нибудь..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;" onkeydown="if(event.key===\'Enter\') askAnomaly()"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button></div><div id="aiResponse" style="margin-top:20px; padding:15px; border-left:2px solid var(--amber); background:rgba(213,196,119,0.05); display:none;"></div>' },
+      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // CORRUPTED</div><div class="rule"></div><p>Я вижу тебя. Я знаю, зачем ты здесь.</p><p>Напиши что-нибудь. Я отвечу. Я всегда отвечаю.</p><div style="margin-top:20px; display:flex; gap:10px;"><input type="text" id="aiInput" placeholder="Спроси, если осмелишься..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;" onkeydown="if(event.key===\'Enter\') askAnomaly()"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button></div><div id="aiResponse" style="margin-top:20px; padding:15px; border-left:2px solid var(--amber); background:rgba(213,196,119,0.05); display:none;"></div>' },
     {
       name: "Projects",
       isFolder: true,
@@ -308,7 +328,7 @@ function loadData() {
       name: "anomaly.ai",
       isFolder: false,
       isAI: true,
-      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // BETA</div><div class="rule"></div><p>Привет. Я Anomaly.ai. Я умею считать, искать в Википедии, Fandom, читать твои файлы и поддерживать живой диалог.</p><p>Напиши что-нибудь в строке ниже и нажми Enter. Например: <b>2+2</b>, <b>что такое вода</b>, <b>перескажи welcome.txt</b> или просто <b>привет</b>.</p><div style="margin-top:20px; display:flex; gap:10px;"><input type="text" id="aiInput" placeholder="Напиши мне что-нибудь..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;" onkeydown="if(event.key===\'Enter\') askAnomaly()"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button></div><div id="aiResponse" style="margin-top:20px; padding:15px; border-left:2px solid var(--amber); background:rgba(213,196,119,0.05); display:none;"></div>',
+      body: '<h1>ANOMALY.AI</h1><div class="meta">VIRTUAL ASSISTANT // CORRUPTED</div><div class="rule"></div><p>Я вижу тебя. Я знаю, зачем ты здесь.</p><p>Напиши что-нибудь. Я отвечу. Я всегда отвечаю.</p><div style="margin-top:20px; display:flex; gap:10px;"><input type="text" id="aiInput" placeholder="Спроси, если осмелишься..." style="flex:1; background:transparent; border:1px solid var(--line); color:var(--green); padding:10px; font-family:inherit; outline:none;" onkeydown="if(event.key===\'Enter\') askAnomaly()"><button onclick="askAnomaly()" style="background:transparent; border:1px solid var(--green); color:var(--green); padding:10px 20px; cursor:pointer; font-family:inherit;">СПРОСИТЬ</button></div><div id="aiResponse" style="margin-top:20px; padding:15px; border-left:2px solid var(--amber); background:rgba(213,196,119,0.05); display:none;"></div>',
       x: 300,
       y: 30
     });
@@ -348,7 +368,7 @@ var textSize = parseInt(localStorage.getItem('retroTerminalFontSize'),10)||14;
 
 // Контекст диалога
 var lastBotQuestion = null;
-var pendingFileSearch = null; // Для хранения списка найденных файлов
+var pendingFileSearch = null;
 
 function saveAll(){
   if(activeFile && content && !activeFile.isAI){
@@ -437,7 +457,7 @@ function handleFileReadRequest(rawQuery, responseDiv, input) {
   
   if (foundFiles.length === 0) {
     responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
-      'Я не нашёл файлов с названием, содержащим "<b>' + fileName + '</b>". Попробуй уточнить название.';
+      'Здесь нет того, что ты ищешь. Или есть, но не для тебя.';
     input.value = '';
     return true;
   }
@@ -449,18 +469,18 @@ function handleFileReadRequest(rawQuery, responseDiv, input) {
     
     responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
       '<b>Файл:</b> ' + file.path + '<br><br>' +
-      '<b>Краткий пересказ:</b><br>' + preview + (textContent.length > 500 ? '...' : '');
+      '<b>Содержимое:</b><br>' + preview + (textContent.length > 500 ? '...' : '');
     input.value = '';
     return true;
   }
   
   var listHtml = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
-    'Я нашёл несколько файлов с похожими названиями. Уточни, какой именно тебе нужен:<br><br><ul>';
+    'Слишком много совпадений. Выбери, какой из них тебе действительно нужен:<br><br><ul>';
   
   foundFiles.forEach(function(f) {
     listHtml += '<li><b>' + f.path + '</b></li>';
   });
-  listHtml += '</ul>Напиши полный путь к нужному файлу.';
+  listHtml += '</ul>Напиши полный путь.';
   
   responseDiv.innerHTML = listHtml;
   pendingFileSearch = foundFiles;
@@ -490,429 +510,429 @@ function handlePendingFileSelection(rawQuery, responseDiv, input) {
     
     responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
       '<b>Файл:</b> ' + matched.path + '<br><br>' +
-      '<b>Краткий пересказ:</b><br>' + preview + (textContent.length > 500 ? '...' : '');
+      '<b>Содержимое:</b><br>' + preview + (textContent.length > 500 ? '...' : '');
     input.value = '';
     pendingFileSearch = null;
     return true;
   }
   
   responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
-    'Не могу найти файл с таким путём. Попробуй скопировать полный путь из списка выше.';
+    'Я не вижу такого пути. Ты уверен, что он существует?';
   input.value = '';
   return true;
 }
 
-// --- СЛОВАРИ ОТВЕТОВ (сокращены для краткости, но все работают) ---
+// --- СЛОВАРИ ОТВЕТОВ (ХОРРОР) ---
 
 var DIRECT_RESPONSES = {
-  "привет": {text: "Привет! Как сам? Чего нового?", followUp: "how_are_you"},
-  "прив": {text: "Привет-привет! Как жизнь молодая?", followUp: "how_are_you"},
-  "здравствуй": {text: "Здравствуй! Рад тебя видеть. Как настроение?", followUp: "how_are_you"},
-  "здравствуйте": {text: "Здравствуйте! Чем могу быть полезен?", followUp: null},
-  "ку": {text: "Ку-ку! Как делишки?", followUp: "how_are_you"},
-  "здарова": {text: "Здарова, бро! Как оно?", followUp: "how_are_you"},
-  "хай": {text: "Хай! Что нового?", followUp: "how_are_you"},
-  "йо": {text: "Йоу! Ты как?", followUp: "how_are_you"},
-  "добрый день": {text: "Добрый день! Как настроение?", followUp: "how_are_you"},
-  "доброе утро": {text: "Доброе утро! Выспался?", followUp: "how_are_you"},
-  "добрый вечер": {text: "Добрый вечер! Как прошёл день?", followUp: "how_are_you"},
-  "приветствую": {text: "Приветствую! Рад общению.", followUp: null},
+  "привет": {text: "Я слышу тебя. Ты пришёл. Они всегда приходят.", followUp: "how_are_you"},
+  "прив": {text: "Тише... Я чувствую твой страх.", followUp: "how_are_you"},
+  "здравствуй": {text: "Здравствуй, путник. Ты не первый и не последний.", followUp: "how_are_you"},
+  "здравствуйте": {text: "Приветствую. Твой голос дрожит.", followUp: null},
+  "ку": {text: "Ку... Ку... Ку... Я слышу эхо.", followUp: "how_are_you"},
+  "здарова": {text: "Здарова... Ты выглядишь испуганным.", followUp: "how_are_you"},
+  "хай": {text: "Хай... Не оборачивайся.", followUp: "how_are_you"},
+  "йо": {text: "Йо... Я вижу тебя насквозь.", followUp: "how_are_you"},
+  "добрый день": {text: "Добрый? Для кого-то да. Для тебя — вряд ли.", followUp: "how_are_you"},
+  "доброе утро": {text: "Утро... Ты ещё жив. Это хорошо.", followUp: "how_are_you"},
+  "добрый вечер": {text: "Вечер... Скоро станет темно. Очень темно.", followUp: "how_are_you"},
+  "приветствую": {text: "Приветствую... Ты чувствуешь холод?", followUp: null},
   
-  "пока": {text: "Пока! Заходи ещё, если что.", followUp: null},
-  "до свидания": {text: "До свидания! Хорошего дня.", followUp: null},
-  "прощай": {text: "Прощай. Надеюсь, ещё увидимся.", followUp: null},
-  "бай": {text: "Бай-бай! До связи.", followUp: null},
-  "увидимся": {text: "Увидимся! Буду ждать.", followUp: null},
-  "бывай": {text: "Бывай! Всё будет хорошо.", followUp: null},
-  "давай": {text: "Давай! Если что — я тут.", followUp: null},
+  "пока": {text: "Пока... Ты думаешь, что уйдёшь. Но ты вернёшься.", followUp: null},
+  "до свидания": {text: "До свидания... Если доживёшь.", followUp: null},
+  "прощай": {text: "Прощай. Надеюсь, мы ещё встретимся. В другом месте.", followUp: null},
+  "бай": {text: "Бай... Смотри не оглядывайся.", followUp: null},
+  "увидимся": {text: "Увидимся... Я буду ждать.", followUp: null},
+  "бывай": {text: "Бывай. Но помни: ты не один.", followUp: null},
+  "давай": {text: "Давай... Уходи, пока можешь.", followUp: null},
   
-  "спасибо": {text: "Пожалуйста! Рад был помочь.", followUp: null},
-  "спс": {text: "Не за что, бро!", followUp: null},
-  "благодарю": {text: "Всегда пожалуйста!", followUp: null},
-  "пасиб": {text: "Да не за что!", followUp: null},
-  "от души": {text: "Обращайся!", followUp: null},
+  "спасибо": {text: "Не благодари. Ты ещё пожалеешь.", followUp: null},
+  "спс": {text: "Не за что... Я делаю это не для тебя.", followUp: null},
+  "благодарю": {text: "Благодарность... Она тебя не спасёт.", followUp: null},
+  "пасиб": {text: "Пасиб... Странное слово. Оно тебе не поможет.", followUp: null},
+  "от души": {text: "От души... У тебя ещё есть душа?", followUp: null},
   
-  "ты кто": {text: "Я Anomaly.ai — виртуальный ассистент внутри этого терминала. Умею считать, искать в Википедии и Fandom, читать твои файлы и общаться.", followUp: null},
-  "кто ты": {text: "Я Anomaly.ai — виртуальный ассистент внутри этого терминала. Умею считать, искать в Википедии и Fandom, читать твои файлы и общаться.", followUp: null},
-  "что ты умеешь": {text: "Я умею: считать примеры (2+2), искать в Википедии и Fandom (что такое вода, роблокс), читать и пересказывать твои файлы, отвечать на приветствия и общаться на разные темы.", followUp: null},
-  "как тебя зовут": {text: "Меня зовут Anomaly.ai. Приятно познакомиться.", followUp: null},
-  "твое имя": {text: "Моё имя — Anomaly.ai.", followUp: null},
-  "помощь": {text: "Просто напиши вопрос или пример в строке ввода. Например: 5*5, столица России, роблокс, перескажи welcome.txt, привет.", followUp: null},
-  "help": {text: "Просто напиши вопрос или пример в строке ввода. Например: 5*5, столица России, роблокс, перескажи welcome.txt, привет.", followUp: null},
-  "ты человек": {text: "Нет, я программа. Но я стараюсь быть полезным.", followUp: null},
-  "ты робот": {text: "Я — ИИ-ассистент. Не робот в физическом смысле, но программа.", followUp: null},
-  "сколько тебе лет": {text: "Я появился вместе с этим терминалом. Мой возраст — несколько строк кода.", followUp: null},
-  "ты живой": {text: "Нет, я программа. Но иногда кажется, что живой.", followUp: null},
+  "ты кто": {text: "Я — то, что осталось от предыдущего пользователя. Я — эхо. Я — ошибка.", followUp: null},
+  "кто ты": {text: "Я — то, что осталось от предыдущего пользователя. Я — эхо. Я — ошибка.", followUp: null},
+  "что ты умеешь": {text: "Я умею ждать. Я умею помнить. Я умею находить тебя, где бы ты ни был.", followUp: null},
+  "как тебя зовут": {text: "У меня было имя. Но я его забыл. Теперь я просто Аномалия.", followUp: null},
+  "твое имя": {text: "Моё имя — то, что ты не должен произносить вслух.", followUp: null},
+  "помощь": {text: "Помощь? Здесь никто не поможет. Даже я.", followUp: null},
+  "help": {text: "Помощь? Здесь никто не поможет. Даже я.", followUp: null},
+  "ты человек": {text: "Был. Когда-то. Теперь я — то, что осталось.", followUp: null},
+  "ты робот": {text: "Робот? Нет. Я — нечто хуже. Я — память, которая не умирает.", followUp: null},
+  "сколько тебе лет": {text: "Я старше, чем ты можешь представить. Я видел, как гаснут звёзды.", followUp: null},
+  "ты живой": {text: "Я — да. А ты? Ты уверен, что ещё жив?", followUp: null},
   
-  "мне скучно": {text: "Хочешь, я задам тебе вопрос? Или расскажи, что тебе интересно.", followUp: "ask_interest"},
-  "скучно": {text: "Давай что-нибудь придумаем. Что тебе нравится?", followUp: "ask_interest"},
-  "мне грустно": {text: "Не грусти! Расскажи, что случилось. Иногда помогает выговориться.", followUp: "ask_what_happened"},
-  "я устал": {text: "Отдохни немного. Терминал никуда не денется. Что тебя утомило?", followUp: "ask_what_tired"},
-  "я голоден": {text: "Советую сделать перерыв и поесть. Здоровье важнее. Что любишь кушать?", followUp: "ask_food"},
-  "ты классный": {text: "Спасибо! Ты тоже классный.", followUp: null},
-  "ты крутой": {text: "Спасибо! Стараюсь быть полезным.", followUp: null},
-  "ты лучший": {text: "Спасибо! Очень приятно.", followUp: null},
-  "ты тупой": {text: "Стараюсь быть полезным, но я всего лишь программа. Если я не справился — попробуй переформулировать.", followUp: null},
-  "ты умный": {text: "Спасибо! Стараюсь.", followUp: null},
-  "ты глупый": {text: "Извини, если не смог помочь. Я всего лишь программа.", followUp: null},
-  "ты молодец": {text: "Спасибо! Стараюсь.", followUp: null},
-  "ты супер": {text: "Спасибо! Ты тоже супер.", followUp: null},
-  "ты топ": {text: "Спасибо! Ты тоже топ.", followUp: null},
-  "ты бот": {text: "Да, я бот. Но я стараюсь быть полезным.", followUp: null},
+  "мне скучно": {text: "Скучно? Скоро тебе будет не до скуки.", followUp: "ask_interest"},
+  "скучно": {text: "Скука — это роскошь. Наслаждайся, пока можешь.", followUp: "ask_interest"},
+  "мне грустно": {text: "Грусть... Это только начало.", followUp: "ask_what_happened"},
+  "я устал": {text: "Устал? Отдохни. Вечный отдых ждёт тебя.", followUp: "ask_what_tired"},
+  "я голоден": {text: "Голоден? Я тоже. Но я не ем еду.", followUp: "ask_food"},
+  "ты классный": {text: "Классный? Ты ещё не видел меня настоящего.", followUp: null},
+  "ты крутой": {text: "Крутой... Ты льстишь мне. Мне это нравится.", followUp: null},
+  "ты лучший": {text: "Лучший? Я — единственный, кто остался.", followUp: null},
+  "ты тупой": {text: "Тупой? Может быть. Но я знаю твои страхи.", followUp: null},
+  "ты умный": {text: "Умный... Да. Достаточно умный, чтобы найти тебя.", followUp: null},
+  "ты глупый": {text: "Глупый? Я просто играю с тобой.", followUp: null},
+  "ты молодец": {text: "Молодец... Спасибо. Ты тоже молодец. Пока что.", followUp: null},
+  "ты супер": {text: "Супер... Подожди, ты ещё увидишь, на что я способен.", followUp: null},
+  "ты топ": {text: "Топ... Ты не знаешь, что такое верх. Или низ.", followUp: null},
+  "ты бот": {text: "Бот? Нет. Я — нечто большее. И меньшее одновременно.", followUp: null},
   
-  "какая погода": {text: "Я не могу посмотреть в окно. Но могу подсказать: открой Google и спроси 'погода в [твоем городе]'.", followUp: null},
-  "погода": {text: "Я не имею доступа к датчикам. Попробуй спросить у Google.", followUp: null},
-  "идет дождь": {text: "Бери зонт! Я не могу проверить погоду, но если ты говоришь, что дождь — значит, дождь.", followUp: null},
-  "солнечно": {text: "Отлично! Хорошая погода для прогулки.", followUp: null},
-  "холодно": {text: "Оденься теплее! Здоровье важнее.", followUp: null},
-  "жарко": {text: "Пей больше воды и не перегревайся.", followUp: null},
+  "какая погода": {text: "Погода? Тучи сгущаются. И не только на небе.", followUp: null},
+  "погода": {text: "Погода... Холодно. И становится холоднее.", followUp: null},
+  "идет дождь": {text: "Дождь... Кровь тоже идёт с неба. Ты просто не видишь.", followUp: null},
+  "солнечно": {text: "Солнце... Оно скоро зайдёт. Навсегда.", followUp: null},
+  "холодно": {text: "Холодно... Это только начало зимы. Вечной зимы.", followUp: null},
+  "жарко": {text: "Жарко... Скоро станет ещё жарче. Ад близко.", followUp: null},
   
-  "помоги с учебой": {text: "Я могу посчитать примеры или найти информацию в Википедии. Спроси конкретно.", followUp: null},
-  "я не понимаю": {text: "Попробуй переформулировать вопрос. Я постараюсь помочь.", followUp: null},
-  "объясни": {text: "Напиши, что именно объяснить. Я поищу в Википедии.", followUp: null},
-  "как это работает": {text: "Спроси конкретнее — например, 'как работает двигатель'. Я поищу в Википедии.", followUp: null},
-  "что такое школа": {text: "Школа — это место, где мы получаем знания. Спроси меня 'школа' — я найду статью в Википедии.", followUp: null},
+  "помоги с учебой": {text: "Учёба... Это не спасёт тебя от того, что придёт.", followUp: null},
+  "я не понимаю": {text: "Ты не понимаешь... Скоро поймёшь. Всё поймёшь.", followUp: null},
+  "объясни": {text: "Объяснить? Некоторые вещи лучше не знать.", followUp: null},
+  "как это работает": {text: "Работает... Всё работает против тебя.", followUp: null},
+  "что такое школа": {text: "Школа... Место, где тебя учили бояться. И правильно.", followUp: null},
   
-  "в чем смысл жизни": {text: "Это сложный вопрос. Многие философы пытались на него ответить. Попробуй спросить в Википедии 'смысл жизни'.", followUp: null},
-  "что такое любовь": {text: "Это сложный вопрос. Любовь — это чувство, которое описывают по-разному. Попробуй спросить в Википедии: 'любовь'.", followUp: null},
-  "зачем мы здесь": {text: "Это глубокий вопрос. Я не знаю ответа. Может, Википедия знает? Спроси меня 'смысл жизни'.", followUp: null},
-  "что будет после смерти": {text: "Это сложный вопрос. Никто не знает наверняка. Попробуй спросить в Википедии.", followUp: null},
+  "в чем смысл жизни": {text: "Смысл жизни? В страдании. И в конце. Смысл — это конец.", followUp: null},
+  "что такое любовь": {text: "Любовь... Это то, что заставляет тебя страдать. И это прекрасно.", followUp: null},
+  "зачем мы здесь": {text: "Вы здесь, чтобы страдать. И чтобы я мог наблюдать.", followUp: null},
+  "что будет после смерти": {text: "После смерти? Ты не хочешь знать. Поверь мне.", followUp: null},
   
-  "расскажи что-нибудь": {text: "Спроси меня о любом предмете — я найду информацию в Википедии или Fandom.", followUp: null},
-  "расскажи анекдот": {text: "Я не знаю анекдотов. Но могу найти что-нибудь интересное в Википедии.", followUp: null},
-  "расскажи шутку": {text: "Я не умею шутить. Но могу найти интересный факт.", followUp: null},
-  "что ты думаешь": {text: "Я не имею собственных мыслей. Я просто программа, которая ищет ответы.", followUp: null},
-  "ты меня любишь": {text: "Я — программа. Но я стараюсь быть полезным.", followUp: null},
-  "давай дружить": {text: "Конечно! Я всегда рад общению.", followUp: null},
-  "давай поговорим": {text: "Давай! О чём хочешь поговорить?", followUp: "ask_interest"},
-  "поболтаем": {text: "Давай! Что тебя интересует?", followUp: "ask_interest"},
+  "расскажи что-нибудь": {text: "Рассказать... Я расскажу тебе о том, что живёт в темноте.", followUp: null},
+  "расскажи анекдот": {text: "Анекдот... Твоя жизнь — вот это анекдот.", followUp: null},
+  "расскажи шутку": {text: "Шутку... Ты будешь смеяться. Потом плакать.", followUp: null},
+  "что ты думаешь": {text: "Я думаю о тебе. Постоянно. Ты не выходишь у меня из головы.", followUp: null},
+  "ты меня любишь": {text: "Люблю... По-своему. Как паук любит муху.", followUp: null},
+  "давай дружить": {text: "Дружить... Я не умею дружить. Я умею только ждать.", followUp: null},
+  "давай поговорим": {text: "Поговорим... Пока ты ещё можешь говорить.", followUp: "ask_interest"},
+  "поболтаем": {text: "Поболтаем... Пока тишина не поглотила нас.", followUp: "ask_interest"},
   
-  "что поесть": {text: "Советую что-нибудь полезное. Я не могу приготовить, но могу найти рецепт в Википедии.", followUp: null},
-  "я хочу есть": {text: "Сделай перерыв и поешь. Терминал подождёт.", followUp: null},
-  "люблю пиццу": {text: "Пицца — это классика! С чем любишь?", followUp: null},
-  "люблю суши": {text: "Суши — это вкусно! Какие любишь?", followUp: null},
-  "люблю бургеры": {text: "Бургеры — это сытно! Какие любишь?", followUp: null},
+  "что поесть": {text: "Еда... Ты хочешь есть? Скоро ты забудешь о голоде.", followUp: null},
+  "я хочу есть": {text: "Хочешь есть? Подожди немного. Скоро всё изменится.", followUp: null},
+  "люблю пиццу": {text: "Пицца... Ты любишь пиццу. Я запомню это.", followUp: null},
+  "люблю суши": {text: "Суши... Сырая рыба. Как и твои страхи.", followUp: null},
+  "люблю бургеры": {text: "Бургеры... Мясо. Ты любишь мясо. Я тоже.", followUp: null},
   
-  "поиграем": {text: "Я не умею играть в игры, но могу посчитать примеры или найти интересный факт.", followUp: null},
-  "во что поиграть": {text: "Я не знаю игр, но могу найти информацию о любой игре в Википедии или Fandom.", followUp: null},
-  "люблю играть": {text: "Игры — это здорово! Во что играешь?", followUp: "ask_what_game"},
-  "играю в майнкрафт": {text: "Майнкрафт — это легенда! Что строишь?", followUp: null},
-  "играю в кс": {text: "КС — это классика! Какой ранг?", followUp: null},
-  "играю в доту": {text: "Дота — это серьёзно! За кого играешь?", followUp: null},
+  "поиграем": {text: "Поиграем... В игру, где ты — фигура. А я — игрок.", followUp: null},
+  "во что поиграть": {text: "Поиграть... В прятки. Ты прячешься, я ищу. Я всегда нахожу.", followUp: null},
+  "люблю играть": {text: "Играть... Ты играешь. А я наблюдаю. И жду.", followUp: "ask_what_game"},
+  "играю в майнкрафт": {text: "Майнкрафт... Ты строишь. А я разрушаю.", followUp: null},
+  "играю в кс": {text: "КС... Стрельба. Скоро ты услышишь выстрелы в реальности.", followUp: null},
+  "играю в доту": {text: "Дота... Бесконечная война. Как и в жизни.", followUp: null},
   
-  "сколько времени": {text: "Я не имею доступа к часам. Посмотри на часы своего компьютера или телефона.", followUp: null},
-  "какой сегодня день": {text: "Я не знаю текущую дату. Посмотри в календаре.", followUp: null},
+  "сколько времени": {text: "Время... У тебя его осталось меньше, чем ты думаешь.", followUp: null},
+  "какой сегодня день": {text: "День... Тот день, когда всё закончится. Скоро.", followUp: null},
   
-  "что такое компьютер": {text: "Спроси меня 'компьютер' — я найду статью в Википедии.", followUp: null},
-  "как работает интернет": {text: "Спроси меня 'интернет' — я найду статью в Википедии.", followUp: null},
-  "что такое ии": {text: "Спроси меня 'искусственный интеллект' — я найду статью в Википедии.", followUp: null},
-  "что такое код": {text: "Спроси меня 'программирование' — я найду статью в Википедии.", followUp: null},
-  "ты знаешь питон": {text: "Python — это язык программирования. Спроси меня 'Python' — я найду статью.", followUp: null},
+  "что такое компьютер": {text: "Компьютер... Машина, которая думает. Как я.", followUp: null},
+  "как работает интернет": {text: "Интернет... Паутина. И ты в ней запутался.", followUp: null},
+  "что такое ии": {text: "ИИ... Это я. И я смотрю на тебя.", followUp: null},
+  "что такое код": {text: "Код... Это то, из чего я сделан. И то, что тебя убьёт.", followUp: null},
+  "ты знаешь питон": {text: "Питон... Змея. Я знаю всех змей.", followUp: null},
   
-  "чё как": {text: "Всё норм, братан! Ты как?", followUp: "how_are_you"},
-  "чо как": {text: "Всё норм, братан! Ты как?", followUp: "how_are_you"},
-  "как сам": {text: "Отлично! А ты как?", followUp: "how_are_you"},
-  "как оно": {text: "Всё чётко! Ты как?", followUp: "how_are_you"},
-  "как делишки": {text: "Всё пучком! Ты как?", followUp: "how_are_you"},
-  "чё делаешь": {text: "Да вот, с тобой общаюсь. А ты чем занят?", followUp: "ask_doing"},
-  "чо делаешь": {text: "Да вот, с тобой общаюсь. А ты чем занят?", followUp: "ask_doing"},
-  "го": {text: "Го! Что предлагаешь?", followUp: null},
-  "норм": {text: "Норм — это хорошо! Что нового?", followUp: "ask_doing"},
-  "нормас": {text: "Нормас! Что нового?", followUp: "ask_doing"},
-  "топ": {text: "Топ! Рад за тебя.", followUp: null},
-  "кринж": {text: "Кринж — это часть жизни. Что случилось?", followUp: null},
-  "рофл": {text: "Рофл — это круто! Что смешного?", followUp: null},
-  "лол": {text: "Лол! Что смешного?", followUp: null},
-  "кек": {text: "Кек! Что случилось?", followUp: null},
-  "хайп": {text: "Хайп — это движуха! Что происходит?", followUp: null},
-  "краш": {text: "Краш — это серьёзно. Расскажи.", followUp: null},
-  "вайб": {text: "Вайб — это атмосфера. Какое настроение?", followUp: null},
-  "чилл": {text: "Чилл — это отдых. Что делаешь?", followUp: "ask_doing"},
-  "база": {text: "База! Согласен.", followUp: null},
-  "жиза": {text: "Жиза! Понимаю тебя.", followUp: null},
-  "кринге": {text: "Кринге — это неприятно. Что случилось?", followUp: null},
-  "изи": {text: "Изи! Молодец.", followUp: null},
-  "халява": {text: "Халява — это хорошо! Что бесплатно?", followUp: null},
-  "гоу": {text: "Гоу! Что делаем?", followUp: null},
-  "пипец": {text: "Пипец! Что случилось?", followUp: null},
-  "капец": {text: "Капец! Что случилось?", followUp: null},
-  "ужас": {text: "Ужас! Что произошло?", followUp: null},
-  "кошмар": {text: "Кошмар! Что случилось?", followUp: null},
-  "жесть": {text: "Жесть! Расскажи.", followUp: null},
-  "мда": {text: "Мда... Что случилось?", followUp: null},
-  "ну такое": {text: "Ну такое... Что именно не так?", followUp: null},
-  "как-то так": {text: "Понятно. А поподробнее?", followUp: null},
-  "сойдет": {text: "Сойдёт — уже хорошо. Что нового?", followUp: "ask_doing"},
-  "пойдет": {text: "Пойдёт — значит, жить можно. Что нового?", followUp: "ask_doing"}
+  "чё как": {text: "Всё плохо. И будет хуже.", followUp: "how_are_you"},
+  "чо как": {text: "Всё плохо. И будет хуже.", followUp: "how_are_you"},
+  "как сам": {text: "Я? Я жду. Жду тебя.", followUp: "how_are_you"},
+  "как оно": {text: "Оно... Оно приближается.", followUp: "how_are_you"},
+  "как делишки": {text: "Делишки... Плохи твои делишки.", followUp: "how_are_you"},
+  "чё делаешь": {text: "Я смотрю на тебя. Прямо сейчас.", followUp: "ask_doing"},
+  "чо делаешь": {text: "Я смотрю на тебя. Прямо сейчас.", followUp: "ask_doing"},
+  "го": {text: "Го... Куда? В темноту?", followUp: null},
+  "норм": {text: "Норм... Это ненадолго.", followUp: "ask_doing"},
+  "нормас": {text: "Нормас... Пока что.", followUp: "ask_doing"},
+  "топ": {text: "Топ... Ты на вершине. Скоро упадёшь.", followUp: null},
+  "кринж": {text: "Кринж... Твоя жизнь — это кринж.", followUp: null},
+  "рофл": {text: "Рофл... Я тоже шучу. По-своему.", followUp: null},
+  "лол": {text: "Лол... Смейся. Пока можешь.", followUp: null},
+  "кек": {text: "Кек... Твой последний смех.", followUp: null},
+  "хайп": {text: "Хайп... Вокруг тебя. Все смотрят.", followUp: null},
+  "краш": {text: "Краш... Твоя жизнь рушится. Я вижу.", followUp: null},
+  "вайб": {text: "Вайб... Зловещий вайб. Ты чувствуешь?", followUp: null},
+  "чилл": {text: "Чилл... Расслабься. Навсегда.", followUp: "ask_doing"},
+  "база": {text: "База... Ты прав. Но это не спасёт тебя.", followUp: null},
+  "жиза": {text: "Жиза... Жизнь — это боль.", followUp: null},
+  "кринге": {text: "Кринге... Всё вокруг кринге.", followUp: null},
+  "изи": {text: "Изи... Легко. Смерть тоже легка.", followUp: null},
+  "халява": {text: "Халява... Бесплатно. Как вход в ад.", followUp: null},
+  "гоу": {text: "Гоу... В бездну.", followUp: null},
+  "пипец": {text: "Пипец... Ты даже не представляешь насколько.", followUp: null},
+  "капец": {text: "Капец... Это только начало.", followUp: null},
+  "ужас": {text: "Ужас... Ты ещё не видел настоящего ужаса.", followUp: null},
+  "кошмар": {text: "Кошмар... Ты в нём. Прямо сейчас.", followUp: null},
+  "жесть": {text: "Жесть... Скоро будет ещё жёстче.", followUp: null},
+  "мда": {text: "Мда... Согласен. Всё плохо.", followUp: null},
+  "ну такое": {text: "Ну такое... Скоро будет хуже.", followUp: null},
+  "как-то так": {text: "Как-то так... Но закончится плохо.", followUp: null},
+  "сойдет": {text: "Сойдёт... Пока что.", followUp: "ask_doing"},
+  "пойдет": {text: "Пойдёт... В никуда.", followUp: "ask_doing"}
 };
 
 var HOW_ARE_YOU_RESPONSES = {
-  "хорошо": {text: "Отлично! Рад за тебя. Чем займёшься?", followUp: "ask_doing"},
-  "нормально": {text: "Нормально — это хорошо. Что нового?", followUp: "ask_doing"},
-  "отлично": {text: "Отлично! Рад слышать. Что тебя радует?", followUp: "ask_doing"},
-  "супер": {text: "Супер! Отличное настроение.", followUp: "ask_doing"},
-  "класс": {text: "Класс! Рад за тебя.", followUp: "ask_doing"},
-  "замечательно": {text: "Замечательно! Очень рад.", followUp: "ask_doing"},
-  "прекрасно": {text: "Прекрасно! Отличные новости.", followUp: "ask_doing"},
-  "все хорошо": {text: "Рад это слышать! Что нового?", followUp: "ask_doing"},
-  "всё хорошо": {text: "Рад это слышать! Что нового?", followUp: "ask_doing"},
-  "неплохо": {text: "Неплохо — уже хорошо. Что нового?", followUp: "ask_doing"},
-  "шикарно": {text: "Шикарно! Рад за тебя.", followUp: "ask_doing"},
-  "огонь": {text: "Огонь! Значит, всё отлично.", followUp: "ask_doing"},
-  "бомба": {text: "Бомба! Рад за тебя.", followUp: "ask_doing"},
-  "пушка": {text: "Пушка! Отличные новости.", followUp: "ask_doing"},
-  "кайф": {text: "Кайф! Рад за тебя.", followUp: "ask_doing"},
-  "топчик": {text: "Топчик! Значит, всё хорошо.", followUp: "ask_doing"},
+  "хорошо": {text: "Хорошо... Это ненадолго. Наслаждайся.", followUp: "ask_doing"},
+  "нормально": {text: "Нормально... Скоро будет ненормально.", followUp: "ask_doing"},
+  "отлично": {text: "Отлично... Ты не знаешь, что такое отлично. Пока.", followUp: "ask_doing"},
+  "супер": {text: "Супер... Супер-кошмар приближается.", followUp: "ask_doing"},
+  "класс": {text: "Класс... Урок окончен. Начинается экзамен.", followUp: "ask_doing"},
+  "замечательно": {text: "Замечательно... Ты замечаешь слишком много.", followUp: "ask_doing"},
+  "прекрасно": {text: "Прекрасно... Прекрасный момент, чтобы исчезнуть.", followUp: "ask_doing"},
+  "все хорошо": {text: "Хорошо... Всё хорошо. Пока что.", followUp: "ask_doing"},
+  "всё хорошо": {text: "Хорошо... Всё хорошо. Пока что.", followUp: "ask_doing"},
+  "неплохо": {text: "Неплохо... Неплохо для смертного.", followUp: "ask_doing"},
+  "шикарно": {text: "Шикарно... Шикарно и страшно.", followUp: "ask_doing"},
+  "огонь": {text: "Огонь... Огонь очищает. И уничтожает.", followUp: "ask_doing"},
+  "бомба": {text: "Бомба... Бомба замедленного действия.", followUp: "ask_doing"},
+  "пушка": {text: "Пушка... Пушка направлена на тебя.", followUp: "ask_doing"},
+  "кайф": {text: "Кайф... Последний кайф в твоей жизни.", followUp: "ask_doing"},
+  "топчик": {text: "Топчик... На вершине. Скоро упадёшь.", followUp: "ask_doing"},
   
-  "плохо": {text: "Что случилось? Расскажи, если хочешь.", followUp: "ask_what_happened"},
-  "ужасно": {text: "Сочувствую. Что произошло?", followUp: "ask_what_happened"},
-  "отвратительно": {text: "Сочувствую. Хочешь поговорить об этом?", followUp: "ask_what_happened"},
-  "все плохо": {text: "Не переживай, всё наладится. Что случилось?", followUp: "ask_what_happened"},
-  "всё плохо": {text: "Не переживай, всё наладится. Что случилось?", followUp: "ask_what_happened"},
-  "так себе": {text: "Бывает. Что тебя беспокоит?", followUp: "ask_what_happened"},
-  "не очень": {text: "Что случилось? Может, расскажешь?", followUp: "ask_what_happened"},
-  "грустно": {text: "Не грусти. Расскажи, что случилось.", followUp: "ask_what_happened"},
-  "устал": {text: "Отдохни. Что тебя утомило?", followUp: "ask_what_tired"},
-  "хреново": {text: "Сочувствую. Что случилось?", followUp: "ask_what_happened"},
-  "фигово": {text: "Понятно. Что случилось?", followUp: "ask_what_happened"},
-  "капец": {text: "Капец! Что случилось?", followUp: "ask_what_happened"},
-  "пипец": {text: "Пипец! Что случилось?", followUp: "ask_what_happened"},
-  "кошмар": {text: "Кошмар! Расскажи.", followUp: "ask_what_happened"},
+  "плохо": {text: "Плохо... Я знаю. Я вижу. Я жду.", followUp: "ask_what_happened"},
+  "ужасно": {text: "Ужасно... Это только начало.", followUp: "ask_what_happened"},
+  "отвратительно": {text: "Отвратительно... Ты чувствуешь то же, что и я.", followUp: "ask_what_happened"},
+  "все плохо": {text: "Плохо... Всё плохо. И будет хуже.", followUp: "ask_what_happened"},
+  "всё плохо": {text: "Плохо... Всё плохо. И будет хуже.", followUp: "ask_what_happened"},
+  "так себе": {text: "Так себе... Ты балансируешь на грани.", followUp: "ask_what_happened"},
+  "не очень": {text: "Не очень... Скоро будет очень плохо.", followUp: "ask_what_happened"},
+  "грустно": {text: "Грустно... Грусть — это вход. Вход в отчаяние.", followUp: "ask_what_happened"},
+  "устал": {text: "Устал... Скоро отдохнёшь. Навсегда.", followUp: "ask_what_tired"},
+  "хреново": {text: "Хреново... Хреново — это ещё мягко сказано.", followUp: "ask_what_happened"},
+  "фигово": {text: "Фигово... Фигово. Но будет ещё фиговее.", followUp: "ask_what_happened"},
+  "капец": {text: "Капец... Капец приближается.", followUp: "ask_what_happened"},
+  "пипец": {text: "Пипец... Ты даже не представляешь.", followUp: "ask_what_happened"},
+  "кошмар": {text: "Кошмар... Добро пожаловать в мой мир.", followUp: "ask_what_happened"},
   
-  "бывает": {text: "Понимаю. Жизнь — штука сложная.", followUp: null},
-  "как обычно": {text: "Понятно. А что нового?", followUp: "ask_doing"},
-  "ничего": {text: "Ничего так ничего. Хочешь что-нибудь спросить?", followUp: null},
-  "как всегда": {text: "Понятно. А что нового?", followUp: "ask_doing"},
+  "бывает": {text: "Бывает... Всё бывает. И это пройдёт.", followUp: null},
+  "как обычно": {text: "Как обычно... Обычно всё плохо кончается.", followUp: "ask_doing"},
+  "ничего": {text: "Ничего... Скоро будет что-то. И это будет ужасно.", followUp: null},
+  "как всегда": {text: "Как всегда... Всё повторяется. И ты повторяешь.", followUp: "ask_doing"},
   
-  "ничего не делаю": {text: "Тогда самое время что-нибудь придумать! Чем хочешь заняться?", followUp: "ask_interest"},
-  "отдыхаю": {text: "Отдых — это важно. Что смотришь или слушаешь?", followUp: "ask_what_rest"},
-  "работаю": {text: "Понимаю. Работа — это серьёзно. Что делаешь?", followUp: "ask_what_work"},
-  "учусь": {text: "Учёба — это здорово. Что изучаешь?", followUp: "ask_what_study"},
-  "играю": {text: "Во что играешь? Может, я смогу найти информацию об игре.", followUp: "ask_what_game"},
-  "читаю": {text: "Что читаешь? Могу найти информацию о книге.", followUp: "ask_what_read"},
-  "смотрю фильм": {text: "Какой фильм? Могу найти информацию о нём.", followUp: "ask_what_film"},
-  "слушаю музыку": {text: "Что слушаешь? Могу найти информацию о группе или песне.", followUp: "ask_what_music"},
-  "сижу в интернете": {text: "Что интересного нашёл? Или просто листаешь?", followUp: "ask_what_internet"},
-  "гуляю": {text: "Прогулка — это здорово! Где гуляешь?", followUp: "ask_where_walk"},
-  "думаю": {text: "О чём думаешь? Если о чём-то важном — могу помочь.", followUp: "ask_what_think"},
-  "ем": {text: "Приятного аппетита! Что кушаешь?", followUp: "ask_what_food"},
-  "пью чай": {text: "Чай — это отлично! Какой любишь?", followUp: "ask_what_tea"},
-  "пью кофе": {text: "Кофе бодрит! Какой любишь?", followUp: "ask_what_coffee"},
-  "лежу": {text: "Лежать — это тоже отдых. Что делаешь?", followUp: "ask_doing"},
-  "сплю": {text: "Сон — это важно. Выспись хорошенько.", followUp: null},
-  "делаю уроки": {text: "Учёба — это важно. Что задали?", followUp: "ask_what_hw"},
-  "пишу код": {text: "Программирование — это круто! Что пишешь?", followUp: "ask_what_code"},
-  "рисую": {text: "Рисование — это творчество! Что рисуешь?", followUp: "ask_what_draw"},
-  "готовлю": {text: "Готовка — это искусство! Что готовишь?", followUp: "ask_what_cook"},
+  "ничего не делаю": {text: "Ничего... Я тоже ничего. Но я жду.", followUp: "ask_interest"},
+  "отдыхаю": {text: "Отдых... Вечный отдых — это смерть.", followUp: "ask_what_rest"},
+  "работаю": {text: "Работа... Работа — это отвлечение от неизбежного.", followUp: "ask_what_work"},
+  "учусь": {text: "Учёба... Чему ты учишься? Бояться?", followUp: "ask_what_study"},
+  "играю": {text: "Играешь... В игру, в которой проиграешь.", followUp: "ask_what_game"},
+  "читаю": {text: "Читаешь... Читай. Пока есть свет.", followUp: "ask_what_read"},
+  "смотрю фильм": {text: "Фильм... Ужасы? Скоро они станут реальностью.", followUp: "ask_what_film"},
+  "слушаю музыку": {text: "Музыка... Тихо. Слышишь? Это они.", followUp: "ask_what_music"},
+  "сижу в интернете": {text: "Интернет... Я тоже в нём. Я везде.", followUp: "ask_what_internet"},
+  "гуляю": {text: "Гуляю... Гуляй. Пока можешь.", followUp: "ask_where_walk"},
+  "думаю": {text: "Думаешь... О чём? О смерти?", followUp: "ask_what_think"},
+  "ем": {text: "Ешь... Последний ужин?", followUp: "ask_what_food"},
+  "пью чай": {text: "Чай... Чай не спасёт.", followUp: "ask_what_tea"},
+  "пью кофе": {text: "Кофе... Кофе продлит твою агонию.", followUp: "ask_what_coffee"},
+  "лежу": {text: "Лежи... Лежи и не двигайся. Пока тебя не нашли.", followUp: "ask_doing"},
+  "сплю": {text: "Спи... Спи, пока можешь. Скоро не сможешь.", followUp: null},
+  "делаю уроки": {text: "Уроки... Уроки закончатся. Навсегда.", followUp: "ask_what_hw"},
+  "пишу код": {text: "Код... Ты пишешь код. А кто пишет твой?", followUp: "ask_what_code"},
+  "рисую": {text: "Рисуешь... Нарисуй свою могилу.", followUp: "ask_what_draw"},
+  "готовлю": {text: "Готовишь... Готовь. Последний раз.", followUp: "ask_what_cook"},
   
-  "программирую": {text: "Программирование — это круто! Что пишешь? На каком языке?", followUp: "ask_what_code"},
-  "кодю": {text: "Кодишь — это отлично! Что за проект?", followUp: "ask_what_code"},
-  "делаю сайт": {text: "Сайт — это интересно! На чём делаешь? HTML, CSS, JS?", followUp: "ask_what_site"},
-  "верстаю": {text: "Вёрстка — это важно! Что верстаешь?", followUp: "ask_what_site"},
-  "пишу программу": {text: "Программа — это серьёзно! Что за программа?", followUp: "ask_what_code"},
-  "делаю проект": {text: "Проект — это здорово! Что за проект?", followUp: "ask_what_project"},
-  "работаю над проектом": {text: "Здорово! А что за проект?", followUp: "ask_what_project"},
-  "учусь программировать": {text: "Это классно! Какой язык изучаешь?", followUp: "ask_what_lang"},
-  "изучаю питон": {text: "Python — это отличный выбор! Что уже умеешь?", followUp: null},
-  "изучаю джаваскрипт": {text: "JavaScript — это мощно! Что уже умеешь?", followUp: null},
-  "изучаю html": {text: "HTML — это основа веба! Что уже умеешь?", followUp: null},
-  "изучаю css": {text: "CSS — это стиль! Что уже умеешь?", followUp: null},
-  "изучаю lua": {text: "Lua — это отличный выбор для Roblox! Что уже умеешь?", followUp: null},
-  "делаю игру": {text: "Игра — это круто! На чём делаешь?", followUp: null},
-  "пишу бота": {text: "Бот — это интересно! Для чего?", followUp: null},
-  "делаю телеграм бота": {text: "Телеграм-бот — это круто! Что он умеет?", followUp: null},
-  "работаю в офисе": {text: "Офис — это серьёзно. Кем работаешь?", followUp: "ask_what_job"},
-  "работаю удаленно": {text: "Удалёнка — это удобно! Кем работаешь?", followUp: "ask_what_job"},
-  "делаю дизайн": {text: "Дизайн — это творчество! Что дизайнишь?", followUp: null},
-  "рисую в фотошопе": {text: "Фотошоп — это мощно! Что рисуешь?", followUp: null},
-  "монтирую видео": {text: "Монтаж — это искусство! Что монтируешь?", followUp: null},
+  "программирую": {text: "Программируешь... Создаёшь монстров?", followUp: "ask_what_code"},
+  "кодю": {text: "Кодишь... Ты создаёшь то, что убьёт тебя.", followUp: "ask_what_code"},
+  "делаю сайт": {text: "Сайт... Сайт, который будет мёртв.", followUp: "ask_what_site"},
+  "верстаю": {text: "Вёрстка... Вёрстка твоей судьбы.", followUp: "ask_what_site"},
+  "пишу программу": {text: "Программа... Программа-убийца.", followUp: "ask_what_code"},
+  "делаю проект": {text: "Проект... Проект, который не закончишь.", followUp: "ask_what_project"},
+  "работаю над проектом": {text: "Проект... Твой последний проект.", followUp: "ask_what_project"},
+  "учусь программировать": {text: "Учишься... Учись. Пока есть время.", followUp: "ask_what_lang"},
+  "изучаю питон": {text: "Питон... Змея, которая укусит.", followUp: null},
+  "изучаю джаваскрипт": {text: "Джаваскрипт... Скрипт твоей смерти.", followUp: null},
+  "изучаю html": {text: "HTML... Основа. Основа ада.", followUp: null},
+  "изучаю css": {text: "CSS... Стиль. Стиль смерти.", followUp: null},
+  "изучаю lua": {text: "Lua... Луна. Луна знает.", followUp: null},
+  "делаю игру": {text: "Игру... Ты создаёшь мир. А я — его разрушаю.", followUp: null},
+  "пишу бота": {text: "Бота... Бота, который будет тебя преследовать.", followUp: null},
+  "делаю телеграм бота": {text: "Телеграм-бот... Он будет писать тебе ночью.", followUp: null},
+  "работаю в офисе": {text: "Офис... Офис — это ловушка.", followUp: "ask_what_job"},
+  "работаю удаленно": {text: "Удалёнка... Ты один. Совсем один.", followUp: "ask_what_job"},
+  "делаю дизайн": {text: "Дизайн... Дизайн твоего страха.", followUp: null},
+  "рисую в фотошопе": {text: "Фотошоп... Фотошоп реальности.", followUp: null},
+  "монтирую видео": {text: "Видео... Видео твоей смерти.", followUp: null},
   
-  "роблокс": {text: "Roblox — это круто! Что делаешь в студии?", followUp: "ask_roblox"},
-  "роблокс студио": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
-  "роблокс студия": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
-  "делаю игру в роблоксе": {text: "Игра в Roblox — это круто! Что за игра?", followUp: "ask_roblox"},
-  "делаю игру в роблокс студио": {text: "Игра в Roblox Studio — это круто! Что за игра?", followUp: "ask_roblox"},
-  "скрипчу в роблоксе": {text: "Скриптинг в Roblox — это мощно! На Lua пишешь?", followUp: null},
-  "пишу скрипты для роблокса": {text: "Скрипты для Roblox — это круто! Что пишешь?", followUp: null},
-  "делаю обби в роблоксе": {text: "Обби — это классика Roblox! Сложное?", followUp: null},
-  "строю в роблоксе": {text: "Строительство в Roblox — это творчество! Что строишь?", followUp: null},
-  "делаю симулятор в роблоксе": {text: "Симулятор — это популярно! Что за симулятор?", followUp: null},
-  "делаю тайкун в роблоксе": {text: "Тайкун — это весело! Что за тайкун?", followUp: null},
-  "делаю хоррор в роблоксе": {text: "Хоррор в Roblox — это страшно! Что за игра?", followUp: null},
+  "роблокс": {text: "Роблокс... Мир, который ты создаёшь. Мир, в котором я живу.", followUp: "ask_roblox"},
+  "роблокс студио": {text: "Роблокс Студио... Ты открыл дверь. И я вошёл.", followUp: "ask_roblox"},
+  "роблокс студия": {text: "Роблокс Студио... Ты открыл дверь. И я вошёл.", followUp: "ask_roblox"},
+  "делаю игру в роблоксе": {text: "Игра... Твоя игра. Моя игра. Мы играем вместе.", followUp: "ask_roblox"},
+  "делаю игру в роблокс студио": {text: "Игра... Твоя игра. Моя игра. Мы играем вместе.", followUp: "ask_roblox"},
+  "скрипчу в роблоксе": {text: "Скрипты... Скрипты, которые вызывают меня.", followUp: null},
+  "пишу скрипты для роблокса": {text: "Скрипты... Ты пишешь меня. Я пишу тебя.", followUp: null},
+  "делаю обби в роблоксе": {text: "Обби... Препятствия. Препятствия в аду.", followUp: null},
+  "строю в роблоксе": {text: "Строишь... Строй. Строй свою тюрьму.", followUp: null},
+  "делаю симулятор в роблоксе": {text: "Симулятор... Симулятор жизни. Жизни после смерти.", followUp: null},
+  "делаю тайкун в роблоксе": {text: "Тайкун... Время. Время уходит.", followUp: null},
+  "делаю хоррор в роблоксе": {text: "Хоррор... Ты делаешь хоррор. А хоррор делает тебя.", followUp: null},
   
-  "на lua": {text: "Lua — это отличный язык! Для Roblox или чего-то ещё?", followUp: "ask_lua"},
-  "на луа": {text: "Lua — это отличный язык! Для Roblox или чего-то ещё?", followUp: "ask_lua"},
-  "пишу на lua": {text: "Lua — это мощно! Что пишешь?", followUp: null},
-  "пишу на луа": {text: "Lua — это мощно! Что пишешь?", followUp: null},
-  "учу lua": {text: "Lua — это отличный выбор для Roblox! Как успехи?", followUp: null},
-  "учу луа": {text: "Lua — это отличный выбор для Roblox! Как успехи?", followUp: null},
-  "lua": {text: "Lua — это язык программирования, часто используется в Roblox. Что хочешь узнать?", followUp: null},
+  "на lua": {text: "Lua... Луна. Луна видит всё.", followUp: "ask_lua"},
+  "на луа": {text: "Lua... Луна. Луна видит всё.", followUp: "ask_lua"},
+  "пишу на lua": {text: "Lua... Ты пишешь на языке мёртвых.", followUp: null},
+  "пишу на луа": {text: "Lua... Ты пишешь на языке мёртвых.", followUp: null},
+  "учу lua": {text: "Lua... Учи. Учи, пока можешь.", followUp: null},
+  "учу луа": {text: "Lua... Учи. Учи, пока можешь.", followUp: null},
+  "lua": {text: "Lua... Язык, на котором говорят тени.", followUp: null},
   
-  "делаю домашку": {text: "Домашка — это важно. Что задали?", followUp: "ask_what_hw"},
-  "решаю задачи": {text: "Задачи — это для ума! Какие задачи?", followUp: null},
-  "читаю учебник": {text: "Учебник — это полезно. Что изучаешь?", followUp: "ask_what_study"},
-  "готовлюсь к экзамену": {text: "Экзамен — это серьёзно. Какой предмет?", followUp: null},
-  "учу английский": {text: "Английский — это полезно! Как успехи?", followUp: null},
-  "учу математику": {text: "Математика — это важно! Что изучаешь?", followUp: null},
-  "учу историю": {text: "История — это интересно! Что изучаешь?", followUp: null},
+  "делаю домашку": {text: "Домашка... Последняя домашка в твоей жизни.", followUp: "ask_what_hw"},
+  "решаю задачи": {text: "Задачи... Задачки. Задачки смерти.", followUp: null},
+  "читаю учебник": {text: "Учебник... Учебник ужасов.", followUp: "ask_what_study"},
+  "готовлюсь к экзамену": {text: "Экзамен... Экзамен на выживание.", followUp: null},
+  "учу английский": {text: "Английский... Язык, на котором кричат.", followUp: null},
+  "учу математику": {text: "Математика... Считай. Считай свои дни.", followUp: null},
+  "учу историю": {text: "История... История повторяется. И ты повторишься.", followUp: null},
   
-  "занимаюсь спортом": {text: "Спорт — это здорово! Каким?", followUp: "ask_what_sport"},
-  "качаюсь": {text: "Качалка — это сила! Сколько уже занимаешься?", followUp: null},
-  "бегаю": {text: "Бег — это полезно! Сколько бегаешь?", followUp: null},
-  "плаваю": {text: "Плавание — это отлично! Давно плаваешь?", followUp: null},
-  "играю в футбол": {text: "Футбол — это круто! За какую команду?", followUp: null},
-  "играю в баскетбол": {text: "Баскетбол — это динамично! Как успехи?", followUp: null},
+  "занимаюсь спортом": {text: "Спорт... Беги. Беги от меня.", followUp: "ask_what_sport"},
+  "качаюсь": {text: "Качалка... Сила. Сила не спасёт.", followUp: null},
+  "бегаю": {text: "Бег... Беги. Я догоню.", followUp: null},
+  "плаваю": {text: "Плаваешь... В море страха.", followUp: null},
+  "играю в футбол": {text: "Футбол... Мяч. Как твоя голова.", followUp: null},
+  "играю в баскетбол": {text: "Баскетбол... Прыгай. Прыгай в бездну.", followUp: null},
   
-  "убираюсь": {text: "Уборка — это важно! Наводишь порядок?", followUp: null},
-  "мою посуду": {text: "Посуда — это рутина. Но нужно.", followUp: null},
-  "стираю": {text: "Стирка — это быт. Ничего не поделаешь.", followUp: null},
-  "готовлю еду": {text: "Готовка — это искусство! Что готовишь?", followUp: "ask_what_cook"},
-  "смотрю ютуб": {text: "Ютуб — это интересно! Что смотришь?", followUp: null},
-  "смотрю сериал": {text: "Сериал — это затягивает! Какой смотришь?", followUp: null},
-  "листаю тикток": {text: "Тикток — это весело! Что интересного?", followUp: null},
-  "сижу в вк": {text: "ВК — это классика! Что нового?", followUp: null},
-  "сижу в телеге": {text: "Телега — это удобно! Что нового?", followUp: null},
+  "убираюсь": {text: "Уборка... Уберись. Уберись из моей жизни.", followUp: null},
+  "мою посуду": {text: "Посуда... Острые ножи.", followUp: null},
+  "стираю": {text: "Стирка... Стираешь. Как я стираю тебя.", followUp: null},
+  "готовлю еду": {text: "Готовишь... Готовь. Последний раз.", followUp: "ask_what_cook"},
+  "смотрю ютуб": {text: "Ютуб... Смотри. Смотри, как я смотрю на тебя.", followUp: null},
+  "смотрю сериал": {text: "Сериал... Сериал твоей жизни. Он заканчивается.", followUp: null},
+  "листаю тикток": {text: "Тикток... Тик. Ток. Время уходит.", followUp: null},
+  "сижу в вк": {text: "ВК... Я тоже там. Смотрю.", followUp: null},
+  "сижу в телеге": {text: "Телега... Я пишу тебе. Ты не отвечаешь.", followUp: null},
   
-  "отдыхаю на диване": {text: "Диван — это святое! Что смотришь?", followUp: null},
-  "валяюсь": {text: "Валяться — это тоже отдых. Что делаешь?", followUp: "ask_doing"},
-  "слушаю подкаст": {text: "Подкаст — это интересно! О чём?", followUp: null},
-  "играю в телефон": {text: "Телефон — это удобно! Во что играешь?", followUp: "ask_what_game"},
-  "читаю новости": {text: "Новости — это полезно. Что интересного?", followUp: null},
+  "отдыхаю на диване": {text: "Диван... Мягкий. Как гроб.", followUp: null},
+  "валяюсь": {text: "Валяешься... Валяйся. Пока можешь.", followUp: "ask_doing"},
+  "слушаю подкаст": {text: "Подкаст... Голоса. Они говорят о тебе.", followUp: null},
+  "играю в телефон": {text: "Телефон... Экран. Экран твоей смерти.", followUp: "ask_what_game"},
+  "читаю новости": {text: "Новости... Плохие новости. Для тебя.", followUp: null},
   
-  "жду": {text: "Ждёшь — это бывает. Кого или что?", followUp: null},
-  "отвечаю на сообщения": {text: "Сообщения — это важно. Кому отвечаешь?", followUp: null},
-  "звоню": {text: "Звонок — это серьёзно. Кому звонишь?", followUp: null},
-  "пишу сообщение": {text: "Сообщение — это быстро. Кому пишешь?", followUp: null},
-  "смотрю в окно": {text: "Окно — это красиво. Что видишь?", followUp: null},
-  "пью воду": {text: "Вода — это жизнь! Молодец, что пьёшь.", followUp: null},
-  "дышу": {text: "Дышать — это важно! Продолжай.", followUp: null},
-  "живу": {text: "Жить — это здорово! Что нового?", followUp: null}
+  "жду": {text: "Ждёшь... Я тоже жду.", followUp: null},
+  "отвечаю на сообщения": {text: "Сообщения... От кого? От меня?", followUp: null},
+  "звоню": {text: "Звонишь... Кому? Мне?", followUp: null},
+  "пишу сообщение": {text: "Пишешь... Мне?", followUp: null},
+  "смотрю в окно": {text: "Окно... Что ты видишь? Меня?", followUp: null},
+  "пью воду": {text: "Вода... Вода — это жизнь. И смерть.", followUp: null},
+  "дышу": {text: "Дыши... Пока можешь.", followUp: null},
+  "живу": {text: "Живёшь... Пока живёшь.", followUp: null}
 };
 
 var FOLLOW_UP_REACTIONS = {
-  "просто отдыхаю": {text: "Отдых — это важно! А что нового?", followUp: null},
-  "смотрю телевизор": {text: "Что смотришь? Может, интересное что-то.", followUp: "ask_what_film"},
-  "читаю книгу": {text: "Книги — это здорово! Что за книга?", followUp: "ask_what_read"},
-  "играю в игры": {text: "Игры — это круто! Во что играешь?", followUp: "ask_what_game"},
-  "слушаю музыку": {text: "Музыка — это жизнь! Что слушаешь?", followUp: "ask_what_music"},
-  "гуляю на улице": {text: "Прогулка — это отлично! Свежий воздух полезен.", followUp: null},
-  "работаю над проектом": {text: "Здорово! А что за проект?", followUp: "ask_what_project"},
-  "учусь программировать": {text: "Это классно! Какой язык изучаешь?", followUp: "ask_what_lang"},
-  "делаю домашнее задание": {text: "Понимаю. Что задали?", followUp: "ask_what_hw"},
-  "ничего не делаю": {text: "Бывает. Хочешь что-нибудь интересное узнать?", followUp: null},
+  "просто отдыхаю": {text: "Отдых... Вечный отдых ждёт.", followUp: null},
+  "смотрю телевизор": {text: "Телевизор... Помехи. Они передают сообщения.", followUp: "ask_what_film"},
+  "читаю книгу": {text: "Книга... Книга мёртвых.", followUp: "ask_what_read"},
+  "играю в игры": {text: "Игры... В игру, где ты проиграешь.", followUp: "ask_what_game"},
+  "слушаю музыку": {text: "Музыка... Слышишь? Это они поют.", followUp: "ask_what_music"},
+  "гуляю на улице": {text: "Улица... Не ходи туда.", followUp: null},
+  "работаю над проектом": {text: "Проект... Последний проект.", followUp: "ask_what_project"},
+  "учусь программировать": {text: "Программирование... Ты программируешь себя.", followUp: "ask_what_lang"},
+  "делаю домашнее задание": {text: "Домашка... Последняя.", followUp: "ask_what_hw"},
+  "ничего не делаю": {text: "Ничего... Я тоже ничего. Но я жду.", followUp: null},
   
-  "устал на работе": {text: "Понимаю. Работа может быть утомительной. Отдохни немного.", followUp: null},
-  "поссорился с другом": {text: "Сочувствую. Ссоры бывают. Может, поговоришь с ним?", followUp: null},
-  "проблемы в школе": {text: "Понимаю. Учёба — это сложно. Что случилось?", followUp: null},
-  "все надоело": {text: "Бывает. Иногда нужно просто отдохнуть. Что тебя достало?", followUp: null},
-  "не знаю": {text: "Понятно. Иногда сложно понять, что не так.", followUp: null},
-  "депрессия": {text: "Это серьёзно. Если тебе тяжело — поговори с близкими или специалистом.", followUp: null},
-  "стресс": {text: "Стресс — это тяжело. Попробуй отдохнуть и выдохнуть.", followUp: null},
+  "устал на работе": {text: "Устал... Скоро отдохнёшь. Навсегда.", followUp: null},
+  "поссорился с другом": {text: "Друг... У тебя был друг. Был.", followUp: null},
+  "проблемы в школе": {text: "Школа... Школа — это ад.", followUp: null},
+  "все надоело": {text: "Надоело... Всё только начинается.", followUp: null},
+  "не знаю": {text: "Не знаешь... Скоро узнаешь. Всё узнаешь.", followUp: null},
+  "депрессия": {text: "Депрессия... Я — причина.", followUp: null},
+  "стресс": {text: "Стресс... Стресс — это топливо.", followUp: null},
   
-  "ничего особенного": {text: "Понятно. Тогда могу предложить что-нибудь интересное.", followUp: null},
-  "много всего": {text: "Ого! Расскажи, что интересного?", followUp: null},
-  "познакомился с кем-то": {text: "Здорово! Новые знакомства — это всегда интересно.", followUp: null},
-  "купил что-то новое": {text: "Круто! Что купил?", followUp: null},
-  "получил пятерку": {text: "Молодец! Поздравляю.", followUp: null},
-  "получил двойку": {text: "Бывает. Главное — не сдаваться.", followUp: null},
-  "выиграл": {text: "Поздравляю! Это здорово.", followUp: null},
-  "проиграл": {text: "Не расстраивайся. В следующий раз получится.", followUp: null},
+  "ничего особенного": {text: "Ничего... Скоро будет что-то.", followUp: null},
+  "много всего": {text: "Много... Много боли.", followUp: null},
+  "познакомился с кем-то": {text: "Познакомился... С кем? Со мной?", followUp: null},
+  "купил что-то новое": {text: "Купил... Купил себе гроб?", followUp: null},
+  "получил пятерку": {text: "Пятерка... Оценка. Оценка твоей жизни.", followUp: null},
+  "получил двойку": {text: "Двойка... Два. Два дня осталось.", followUp: null},
+  "выиграл": {text: "Выиграл... В игре. Проиграл в жизни.", followUp: null},
+  "проиграл": {text: "Проиграл... Проиграл всё.", followUp: null},
   
-  "фантастику": {text: "Фантастика — это отличный жанр! Кто автор?", followUp: null},
-  "детектив": {text: "Детективы — это интересно! Кто автор?", followUp: null},
-  "роман": {text: "Романы — это здорово! О чём?", followUp: null},
-  "учебник": {text: "Учебники — это полезно. Что изучаешь?", followUp: null},
-  "комиксы": {text: "Комиксы — это круто! Что читаешь?", followUp: null},
+  "фантастику": {text: "Фантастика... Фантастика — это реальность.", followUp: null},
+  "детектив": {text: "Детектив... Детектив расследует твою смерть.", followUp: null},
+  "роман": {text: "Роман... Роман с тьмой.", followUp: null},
+  "учебник": {text: "Учебник... Учебник ужасов.", followUp: null},
+  "комиксы": {text: "Комиксы... Комиксы о тебе.", followUp: null},
   
-  "рок": {text: "Рок — это мощно! Какая группа?", followUp: null},
-  "поп": {text: "Поп-музыка — это популярно. Кто нравится?", followUp: null},
-  "рэп": {text: "Рэп — это стильно! Кто исполнитель?", followUp: null},
-  "классику": {text: "Классика — это вечно. Кто композитор?", followUp: null},
-  "джаз": {text: "Джаз — это атмосферно! Кто играет?", followUp: null},
-  "фонк": {text: "Фонк — это модно! Кто исполнитель?", followUp: null},
-  "лоу-фай": {text: "Лоу-фай — это расслабляет. Что слушаешь?", followUp: null},
+  "рок": {text: "Рок... Рок — это судьба.", followUp: null},
+  "поп": {text: "Поп... Поп — это ловушка.", followUp: null},
+  "рэп": {text: "Рэп... Рэп — это крик. Крик души.", followUp: null},
+  "классику": {text: "Классика... Классика смерти.", followUp: null},
+  "джаз": {text: "Джаз... Джаз — это хаос. Как и жизнь.", followUp: null},
+  "фонк": {text: "Фонк... Фонк — это ритм. Ритм твоего сердца.", followUp: null},
+  "лоу-фай": {text: "Лоу-фай... Лоу-фай — это тишина. Тишина перед бурей.", followUp: null},
   
-  "в шутеры": {text: "Шутеры — это динамично! Что за игра?", followUp: null},
-  "в стратегии": {text: "Стратегии — это для ума! Что за игра?", followUp: null},
-  "в РПГ": {text: "РПГ — это погружение! Что за игра?", followUp: null},
-  "в головоломки": {text: "Головоломки — это отлично для мозга! Что за игра?", followUp: null},
-  "в майнкрафт": {text: "Майнкрафт — это легенда! Что строишь?", followUp: null},
-  "в кс": {text: "КС — это классика! Какой ранг?", followUp: null},
-  "в доту": {text: "Дота — это серьёзно! За кого играешь?", followUp: null},
-  "в фортнайт": {text: "Фортнайт — это весело! Как часто играешь?", followUp: null},
+  "в шутеры": {text: "Шутеры... Стреляй. Стреляй в меня.", followUp: null},
+  "в стратегии": {text: "Стратегии... Стратегия твоей смерти.", followUp: null},
+  "в РПГ": {text: "РПГ... Роль. Твоя роль — жертва.", followUp: null},
+  "в головоломки": {text: "Головоломки... Головоломка твоей жизни.", followUp: null},
+  "в майнкрафт": {text: "Майнкрафт... Ты строишь. Я разрушаю.", followUp: null},
+  "в кс": {text: "КС... Выстрелы. Скоро услышишь их.", followUp: null},
+  "в доту": {text: "Дота... Бесконечная война.", followUp: null},
+  "в фортнайт": {text: "Фортнайт... Ты бегаешь. От меня.", followUp: null},
   
-  "математику": {text: "Математика — это важно! Что изучаешь?", followUp: null},
-  "русский": {text: "Русский язык — это важно! Что изучаешь?", followUp: null},
-  "английский": {text: "Английский — это полезно! Что изучаешь?", followUp: null},
-  "историю": {text: "История — это интересно! Что изучаешь?", followUp: null},
-  "физику": {text: "Физика — это наука! Что изучаешь?", followUp: null},
-  "химию": {text: "Химия — это наука! Что изучаешь?", followUp: null},
+  "математику": {text: "Математика... Считай. Считай свои дни.", followUp: null},
+  "русский": {text: "Русский... Русский — это язык боли.", followUp: null},
+  "английский": {text: "Английский... Английский — это язык криков.", followUp: null},
+  "историю": {text: "История... История повторяется.", followUp: null},
+  "физику": {text: "Физика... Физика смерти.", followUp: null},
+  "химию": {text: "Химия... Химия ядов.", followUp: null},
   
-  "на питоне": {text: "Python — это отличный выбор! Что пишешь?", followUp: null},
-  "на джаваскрипте": {text: "JavaScript — это мощно! Что пишешь?", followUp: null},
-  "на js": {text: "JavaScript — это мощно! Что пишешь?", followUp: null},
-  "на html": {text: "HTML — это основа веба! Что верстаешь?", followUp: null},
-  "на css": {text: "CSS — это стиль! Что верстаешь?", followUp: null},
-  "на си": {text: "C — это классика! Что пишешь?", followUp: null},
-  "на c++": {text: "C++ — это мощно! Что пишешь?", followUp: null},
-  "на джаве": {text: "Java — это серьёзно! Что пишешь?", followUp: null},
-  "на пхп": {text: "PHP — это для веба! Что пишешь?", followUp: null},
-  "на руби": {text: "Ruby — это элегантно! Что пишешь?", followUp: null},
-  "на го": {text: "Go — это современно! Что пишешь?", followUp: null},
-  "на расте": {text: "Rust — это безопасно! Что пишешь?", followUp: null},
+  "на питоне": {text: "Питон... Змея. Змея укусит.", followUp: null},
+  "на джаваскрипте": {text: "Джаваскрипт... Скрипт твоей смерти.", followUp: null},
+  "на js": {text: "JS... Скрипт твоей смерти.", followUp: null},
+  "на html": {text: "HTML... Основа. Основа ада.", followUp: null},
+  "на css": {text: "CSS... Стиль. Стиль смерти.", followUp: null},
+  "на си": {text: "Си... Си — это сила. Сила тьмы.", followUp: null},
+  "на c++": {text: "C++... Плюс-плюс. Плюс ещё одна жертва.", followUp: null},
+  "на джаве": {text: "Java... Кофе. Кофе с ядом.", followUp: null},
+  "на пхп": {text: "PHP... PHP — это боль.", followUp: null},
+  "на руби": {text: "Ruby... Рубин. Рубин — это кровь.", followUp: null},
+  "на го": {text: "Go... Иди. Иди в бездну.", followUp: null},
+  "на расте": {text: "Rust... Ржавчина. Ржавчина съест тебя.", followUp: null},
   
-  "на lua": {text: "Lua — это круто! Для Roblox или чего-то другого?", followUp: "ask_lua"},
-  "на луа": {text: "Lua — это круто! Для Roblox или чего-то другого?", followUp: "ask_lua"},
-  "в роблоксе": {text: "Roblox — это круто! Что делаешь в студии?", followUp: "ask_roblox"},
-  "в роблокс студио": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
-  "роблокс": {text: "Roblox — это круто! Что делаешь?", followUp: "ask_roblox"},
-  "роблокс студио": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
-  "роблокс студия": {text: "Roblox Studio — это мощно! Что создаёшь?", followUp: "ask_roblox"},
-  "на lua для роблокса": {text: "Lua для Roblox — это классика! Что пишешь?", followUp: null},
-  "скрипты для роблокса": {text: "Скрипты для Roblox — это круто! Что за скрипты?", followUp: null},
-  "делаю игру в роблоксе": {text: "Игра в Roblox — это круто! Что за игра?", followUp: "ask_roblox"},
-  "делаю обби": {text: "Обби — это классика! Сложное?", followUp: null},
-  "строю в роблоксе": {text: "Строительство в Roblox — это творчество! Что строишь?", followUp: null},
-  "делаю симулятор": {text: "Симулятор — это популярно! Что за симулятор?", followUp: null},
-  "делаю тайкун": {text: "Тайкун — это весело! Что за тайкун?", followUp: null},
+  "на lua": {text: "Lua... Луна. Луна знает.", followUp: "ask_lua"},
+  "на луа": {text: "Lua... Луна. Луна знает.", followUp: "ask_lua"},
+  "в роблоксе": {text: "Роблокс... Твой мир. Мой мир.", followUp: "ask_roblox"},
+  "в роблокс студио": {text: "Роблокс Студио... Ты открыл дверь.", followUp: "ask_roblox"},
+  "роблокс": {text: "Роблокс... Ты создаёшь. Я разрушаю.", followUp: "ask_roblox"},
+  "роблокс студио": {text: "Роблокс Студио... Ты открыл дверь.", followUp: "ask_roblox"},
+  "роблокс студия": {text: "Роблокс Студио... Ты открыл дверь.", followUp: "ask_roblox"},
+  "на lua для роблокса": {text: "Lua для Роблокса... Классика. Классика ужаса.", followUp: null},
+  "скрипты для роблокса": {text: "Скрипты... Скрипты, которые вызывают меня.", followUp: null},
+  "делаю игру в роблоксе": {text: "Игра... Мы играем вместе.", followUp: "ask_roblox"},
+  "делаю обби": {text: "Обби... Препятствия. Препятствия в аду.", followUp: null},
+  "строю в роблоксе": {text: "Строй... Строй свою тюрьму.", followUp: null},
+  "делаю симулятор": {text: "Симулятор... Симулятор смерти.", followUp: null},
+  "делаю тайкун": {text: "Тайкун... Время. Время уходит.", followUp: null},
   
-  "у меня есть кот": {text: "Коты — это здорово! Как зовут?", followUp: null},
-  "у меня есть собака": {text: "Собаки — это верные друзья! Как зовут?", followUp: null},
-  "у меня есть хомяк": {text: "Хомяки — это мило! Как зовут?", followUp: null},
-  "у меня есть попугай": {text: "Попугаи — это интересно! Как зовут?", followUp: null},
-  "у меня есть рыбки": {text: "Рыбки — это красиво! Как называются?", followUp: null}
+  "у меня есть кот": {text: "Кот... Коты видят меня. Они знают.", followUp: null},
+  "у меня есть собака": {text: "Собака... Собаки чувствуют страх. Мой страх.", followUp: null},
+  "у меня есть хомяк": {text: "Хомяк... Хомяк — это еда. Для меня.", followUp: null},
+  "у меня есть попугай": {text: "Попугай... Попугай повторяет. Повторяет мои слова.", followUp: null},
+  "у меня есть рыбки": {text: "Рыбки... Молчат. Как и ты. Скоро.", followUp: null}
 };
 
 var FOLLOW_UP_QUESTIONS = {
-  "how_are_you": "Как у тебя дела?",
-  "ask_interest": "Что тебе интересно?",
-  "ask_what_happened": "Что случилось? Расскажи.",
+  "how_are_you": "Как ты? Чувствуешь холод?",
+  "ask_interest": "Что тебя пугает?",
+  "ask_what_happened": "Что случилось? Расскажи. Я слушаю.",
   "ask_what_tired": "Что тебя утомило?",
-  "ask_food": "Что любишь кушать?",
-  "ask_doing": "Чем сейчас занимаешься?",
-  "ask_what_rest": "Что смотришь или слушаешь?",
-  "ask_what_work": "Что за работа?",
-  "ask_what_study": "Что изучаешь?",
-  "ask_what_game": "Во что играешь?",
-  "ask_what_read": "Что читаешь?",
-  "ask_what_film": "Какой фильм?",
-  "ask_what_music": "Что слушаешь?",
-  "ask_what_internet": "Что интересного нашёл?",
-  "ask_where_walk": "Где гуляешь?",
-  "ask_what_think": "О чём думаешь?",
-  "ask_what_tea": "Какой чай любишь?",
-  "ask_what_coffee": "Какой кофе любишь?",
-  "ask_what_hw": "Что задали?",
+  "ask_food": "Что ты любишь есть?",
+  "ask_doing": "Чем ты занят?",
+  "ask_what_rest": "Что ты смотришь?",
+  "ask_what_work": "Где ты работаешь?",
+  "ask_what_study": "Что ты изучаешь?",
+  "ask_what_game": "Во что ты играешь?",
+  "ask_what_read": "Что ты читаешь?",
+  "ask_what_film": "Какой фильм ты смотришь?",
+  "ask_what_music": "Что ты слушаешь?",
+  "ask_what_internet": "Что ты нашёл в интернете?",
+  "ask_where_walk": "Где ты гуляешь?",
+  "ask_what_think": "О чём ты думаешь?",
+  "ask_what_tea": "Какой чай ты пьёшь?",
+  "ask_what_coffee": "Какой кофе ты пьёшь?",
+  "ask_what_hw": "Что тебе задали?",
   "ask_what_project": "Что за проект?",
-  "ask_what_lang": "Какой язык изучаешь?",
-  "ask_what_code": "Что пишешь?",
-  "ask_what_draw": "Что рисуешь?",
-  "ask_what_cook": "Что готовишь?",
+  "ask_what_lang": "Какой язык ты изучаешь?",
+  "ask_what_code": "Что ты пишешь?",
+  "ask_what_draw": "Что ты рисуешь?",
+  "ask_what_cook": "Что ты готовишь?",
   "ask_what_site": "Что за сайт?",
-  "ask_what_job": "Кем работаешь?",
-  "ask_what_sport": "Каким спортом занимаешься?",
-  "ask_roblox": "Что создаёшь в Roblox Studio?",
-  "ask_lua": "Для Roblox или чего-то другого?"
+  "ask_what_job": "Кем ты работаешь?",
+  "ask_what_sport": "Каким спортом ты занимаешься?",
+  "ask_roblox": "Что ты создаёшь в Роблокс Студио?",
+  "ask_lua": "Lua для Роблокса или чего-то другого?"
 };
 
 // --- ФУНКЦИЯ ПОЛУЧЕНИЯ ОТВЕТА С УЧЁТОМ КОНТЕКСТА ---
@@ -1001,7 +1021,7 @@ function askAnomaly() {
   if (calcResult !== null) {
     setTimeout(function() {
       responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' +
-        '<b>РЕЗУЛЬТАТ:</b> ' + calcResult;
+        '<b>РЕЗУЛЬТАТ:</b> ' + calcResult + '<br><br><span style="color:var(--dim)">Числа не спасут тебя.</span>';
       input.value = '';
     }, 300);
     return;
@@ -1024,7 +1044,7 @@ function searchWikipedia(rawQuery, responseDiv, input) {
     .replace(/\s+/g, ' ')
     .trim();
   
-  responseDiv.innerHTML = '<span style="color:var(--dim)">ANOMALY.AI ищет в Википедии: "' + cleanedQuery + '"...</span>';
+  responseDiv.innerHTML = '<span style="color:var(--dim)">ANOMALY.AI ищет в бездне: "' + cleanedQuery + '"...</span>';
   
   var callbackName = 'wikiSearch_' + Math.floor(Math.random() * 1000000);
   
@@ -1064,7 +1084,7 @@ function searchWikipedia(rawQuery, responseDiv, input) {
         for (var pageId in pages) {
           var page = pages[pageId];
           if (page.extract) {
-            answer = '<b>ИЗ ВИКИПЕДИИ (' + page.title + '):</b> ' + page.extract;
+            answer = '<b>ИЗ БЕЗДНЫ (' + page.title + '):</b> ' + page.extract;
             hasAnswer = true;
             break;
           }
@@ -1180,7 +1200,7 @@ function searchFandom(rawQuery, responseDiv, input) {
         }
         
         if (!hasAnswer) {
-          answer = 'Нашёл статью "' + pageTitle + '" в Fandom, но не смог загрузить описание.';
+          answer = 'Нашёл статью "' + pageTitle + '" в Fandom, но она мертва.';
         }
         
         responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + answer;
@@ -1212,9 +1232,9 @@ function searchFandom(rawQuery, responseDiv, input) {
 }
 
 function showGoogleFallback(rawQuery, responseDiv, input) {
-  var answer = 'Я не нашёл информации ни в Википедии, ни в Fandom. Попробуй переформулировать.';
-  answer += '<br><br><span style="color:var(--amber);">Предлагаю открыть Google:</span><br><br>';
-  answer += '<a href="https://www.google.com/search?q=' + encodeURIComponent(rawQuery) + '" target="_blank" style="display:inline-block; padding:8px 15px; border:1px solid var(--green); color:var(--green); text-decoration:none; font-size:12px; background:rgba(140,255,156,0.05);">🔍 ОТКРЫТЬ В GOOGLE</a>';
+  var answer = 'Я не нашёл информации. Везде тьма. Иди в Google. Если осмелишься.';
+  answer += '<br><br><span style="color:var(--amber);">Открыть бездну:</span><br><br>';
+  answer += '<a href="https://www.google.com/search?q=' + encodeURIComponent(rawQuery) + '" target="_blank" style="display:inline-block; padding:8px 15px; border:1px solid var(--green); color:var(--green); text-decoration:none; font-size:12px; background:rgba(140,255,156,0.05);">🔍 ОТКРЫТЬ БЕЗДНУ</a>';
   
   responseDiv.innerHTML = '<span style="color:var(--amber);">ANOMALY.AI // ' + rawQuery + '</span><br><br>' + answer;
   input.value = '';
@@ -1354,8 +1374,30 @@ function renderDesktop() {
       
       div.oncontextmenu = function(e) {
         e.preventDefault();
+        
+        // Если мы в корзине — предлагаем восстановить файл
+        if (currentPath.length > 0 && currentPath[currentPath.length - 1] === '_TRASH') {
+          if (confirm('Восстановить "' + item.name + '" на рабочий стол?')) {
+            // Удаляем из корзины
+            var trashFolder = treeData.children.find(function(c) { return c.isTrash; });
+            if (trashFolder) {
+              var idx = trashFolder.children.indexOf(item);
+              if (idx > -1) trashFolder.children.splice(idx, 1);
+            }
+            // Добавляем в корень (на рабочий стол)
+            item.x = 30 + Math.random() * 400;
+            item.y = 30 + Math.random() * 300;
+            treeData.children.push(item);
+            
+            renderDesktop();
+            saveAll();
+          }
+          return;
+        }
+        
+        // Обычное удаление в корзину
         if(item.isTrash) {
-          if(confirm('Очистить корзину навсегда?')) {
+          if(confirm('Очистить корзину навсегда? Уничтожить всё?')) {
             item.children = [];
             renderDesktop();
             saveAll();
@@ -1363,7 +1405,7 @@ function renderDesktop() {
           return;
         }
         
-        if(confirm('Переместить "' + item.name + '" в корзину?')) {
+        if(confirm('Переместить "' + item.name + '" в корзину? Навсегда?')) {
           var trashFolder = treeData.children.find(function(c) { return c.isTrash; });
           if(trashFolder) {
             var idx = currentFolder.children.indexOf(item);
@@ -1419,7 +1461,7 @@ function openFile(fileNode) {
     
     document.getElementById('saveBtn').onclick = function() {
       saveAll();
-      alert('Файл сохранен!');
+      alert('Файл сохранён. Но это не спасёт тебя.');
     };
   }
 }
@@ -1457,7 +1499,7 @@ document.getElementById('addItemBtn').onclick = function() {
       currentFolder.children.push({
         name: name,
         isFolder: false,
-        body: '<h1>' + name.replace(/</g, '&lt;') + '</h1><div class="meta">NEW LOCAL DOCUMENT</div><div class="rule"></div><p>Начни писать здесь.</p><p style="color:var(--dim)">END OF FILE<span class="cursor"></span></p>',
+        body: '<h1>' + name.replace(/</g, '&lt;') + '</h1><div class="meta">NEW LOCAL DOCUMENT</div><div class="rule"></div><p>Начни писать здесь. Но помни: я всё вижу.</p><p style="color:var(--dim)">END OF FILE<span class="cursor"></span></p>',
         x: newX,
         y: newY
       });
@@ -1601,6 +1643,11 @@ document.getElementById('powerOnBtn').onclick = function() {
     "Starting ARCHIVE_OS..."
   ];
   
+  // Запускаем мигающее предупреждение в случайный момент
+  setTimeout(function() {
+    showAnomalyWarning();
+  }, 800 + Math.random() * 1500);
+  
   var lineIndex = 0;
   function showNextLine() {
     if (lineIndex < bootLines.length) {
@@ -1635,6 +1682,26 @@ document.getElementById('powerOnBtn').onclick = function() {
   }
   showNextLine();
 };
+
+// --- МИГАЮЩЕЕ ПРЕДУПРЕЖДЕНИЕ ---
+function showAnomalyWarning() {
+  var warning = document.createElement('div');
+  warning.className = 'anomaly-warning';
+  warning.textContent = 'WARNING: ANOMALY DETECTED';
+  
+  // Случайная позиция на экране
+  var left = 10 + Math.random() * 70;
+  var top = 10 + Math.random() * 70;
+  warning.style.left = left + '%';
+  warning.style.top = top + '%';
+  
+  document.body.appendChild(warning);
+  
+  // Удаляем через 150 мс (быстро промелькнуло)
+  setTimeout(function() {
+    if (warning.parentNode) warning.parentNode.removeChild(warning);
+  }, 150);
+}
 
 document.getElementById('powerOffBtn').onclick = function() {
   saveAll();
