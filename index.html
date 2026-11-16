@@ -172,9 +172,10 @@ body:after {
 
 .editor-main-wrap {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -182,16 +183,19 @@ body:after {
   position: absolute;
   top: 0; right: 0; bottom: 0; left: 0;
   padding: 25px 34px 30px;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+  overflow-y: auto !important;
+  overflow-x: hidden;
   color: var(--green) !important;
   transition: left 0.3s ease;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  z-index: 10; /* ФИКС: ниже списка чатов */
+  z-index: 10;
+  scrollbar-width: thin;
+  scrollbar-color: #205a2a transparent;
 }
-.content::-webkit-scrollbar{width:7px}
-.content::-webkit-scrollbar-thumb{background:#205a2a}
+.content::-webkit-scrollbar{width:8px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:#205a2a;border-radius:4px}
 
 .system-prompt {color: var(--amber); font-size: 14px; margin-bottom: 22px; user-select:none;}
 .system-prompt span {color: var(--green);}
@@ -209,20 +213,25 @@ body:after {
 .nav button,.add{font:inherit;color:var(--green);background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}.nav button:hover,.add:hover{border-color:var(--green);color:var(--bright);box-shadow:0 0 8px rgba(140,255,156,.2)}
 .controls{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:16px;overflow-x:auto; scrollbar-width:none;}.controls::-webkit-scrollbar{display:none;}.controls button{font:inherit;font-size:11px;color:var(--green);background:transparent;border:1px solid var(--line);padding:3px 6px;cursor:pointer; white-space:nowrap;}.controls button:hover{border-color:var(--green);color:var(--bright)}.size-label{min-width:38px;text-align:center;color:var(--dim);font-size:10px}.color-picker{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:10px;margin-left:5px; white-space:nowrap;}.color-picker input{width:25px;height:20px;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer}
 
-/* ФИКС: список чатов — поверх контента, с прокруткой */
 #chatListContainer {
   position: absolute;
   top: 0; left: 0; bottom: 0;
   width: 200px;
   border-right: 1px solid var(--line);
   padding: 10px;
-  overflow-y: auto;
+  overflow-y: auto !important;
+  overflow-x: hidden;
   background: rgba(0,0,0,0.95);
   display: none;
   flex-direction: column;
   z-index: 30;
   box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+  scrollbar-width: thin;
+  scrollbar-color: #205a2a transparent;
 }
+#chatListContainer::-webkit-scrollbar{width:8px}
+#chatListContainer::-webkit-scrollbar-track{background:transparent}
+#chatListContainer::-webkit-scrollbar-thumb{background:#205a2a;border-radius:4px}
 #chatListContainer.active { display: flex; }
 .chat-item { padding: 8px; cursor: pointer; color: var(--dim); border: 1px solid transparent; margin-bottom: 5px; font-size: 12px; display: flex; justify-content: space-between; flex-shrink: 0; }
 .chat-item:hover, .chat-item.active { color: var(--bright); border-color: var(--line); background: rgba(140,255,156,0.05); }
@@ -270,7 +279,7 @@ body:after {
 #secretArchive h2 { color: #ff2222; font-size: 20px; letter-spacing: 3px; margin: 0; text-shadow: 0 0 10px #ff0000; }
 #secretArchive .archive-close-btn { background: transparent; color: #ff5555; border: 1px solid #ff5555; padding: 5px 15px; cursor: pointer; font-family: inherit; }
 #secretArchive .archive-close-btn:hover { background: #ff5555; color: #000; }
-#secretArchive .archive-content { flex: 1; overflow-y: auto; color: var(--dim); font-size: 14px; padding: 10px; display: flex; flex-wrap: wrap; gap: 20px; align-content: flex-start; }
+#secretArchive .archive-content { flex: 1; overflow-y: auto !important; color: var(--dim); font-size: 14px; padding: 10px; display: flex; flex-wrap: wrap; gap: 20px; align-content: flex-start; }
 .archive-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 120px; text-align: center; cursor: pointer; padding: 10px; border: 1px solid transparent; border-radius: 4px; transition: all 0.2s; color: var(--bright); }
 .archive-item:hover { background: rgba(255, 34, 34, 0.1); border-color: #ff2222; box-shadow: 0 0 15px rgba(255, 34, 34, 0.3); }
 .archive-item .archive-icon { font-size: 50px; margin-bottom: 10px; text-shadow: 0 0 15px #ff2222; }
@@ -279,7 +288,7 @@ body:after {
 #archiveFileView.active { display: flex; }
 #archiveFileView .file-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 15px; }
 #archiveFileView .file-header h3 { color: var(--green); margin: 0; font-size: 18px; }
-#archiveFileView .file-content { flex: 1; overflow-y: auto; color: var(--green); line-height: 1.6; }
+#archiveFileView .file-content { flex: 1; overflow-y: auto !important; color: var(--green); line-height: 1.6; }
 .quest-container { max-width: 600px; margin: 0 auto; text-align: center; }
 .quest-slots { font-size: 32px; letter-spacing: 10px; margin: 20px 0; color: var(--amber); }
 .quest-slots span { display: inline-block; width: 40px; border-bottom: 2px solid var(--line); margin: 0 5px; }
