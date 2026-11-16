@@ -188,6 +188,7 @@ body:after {
   transition: left 0.3s ease;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  z-index: 10; /* ФИКС: ниже списка чатов */
 }
 .content::-webkit-scrollbar{width:7px}
 .content::-webkit-scrollbar-thumb{background:#205a2a}
@@ -208,6 +209,7 @@ body:after {
 .nav button,.add{font:inherit;color:var(--green);background:transparent;border:1px solid var(--line);padding:6px 10px;cursor:pointer}.nav button:hover,.add:hover{border-color:var(--green);color:var(--bright);box-shadow:0 0 8px rgba(140,255,156,.2)}
 .controls{display:flex;align-items:center;gap:5px;margin-left:auto;margin-right:16px;overflow-x:auto; scrollbar-width:none;}.controls::-webkit-scrollbar{display:none;}.controls button{font:inherit;font-size:11px;color:var(--green);background:transparent;border:1px solid var(--line);padding:3px 6px;cursor:pointer; white-space:nowrap;}.controls button:hover{border-color:var(--green);color:var(--bright)}.size-label{min-width:38px;text-align:center;color:var(--dim);font-size:10px}.color-picker{display:flex;align-items:center;gap:4px;color:var(--dim);font-size:10px;margin-left:5px; white-space:nowrap;}.color-picker input{width:25px;height:20px;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer}
 
+/* ФИКС: список чатов — поверх контента, с прокруткой */
 #chatListContainer {
   position: absolute;
   top: 0; left: 0; bottom: 0;
@@ -215,13 +217,14 @@ body:after {
   border-right: 1px solid var(--line);
   padding: 10px;
   overflow-y: auto;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0,0,0,0.95);
   display: none;
   flex-direction: column;
-  z-index: 20;
+  z-index: 30;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.5);
 }
 #chatListContainer.active { display: flex; }
-.chat-item { padding: 8px; cursor: pointer; color: var(--dim); border: 1px solid transparent; margin-bottom: 5px; font-size: 12px; display: flex; justify-content: space-between; }
+.chat-item { padding: 8px; cursor: pointer; color: var(--dim); border: 1px solid transparent; margin-bottom: 5px; font-size: 12px; display: flex; justify-content: space-between; flex-shrink: 0; }
 .chat-item:hover, .chat-item.active { color: var(--bright); border-color: var(--line); background: rgba(140,255,156,0.05); }
 .chat-item .del-chat { color: #ff5555; cursor: pointer; font-weight: bold; padding: 0 5px; }
 .chat-item .del-chat:hover { color: #fff; }
@@ -521,7 +524,6 @@ var chatHistory = [];
 var currentChatId = null;
 var CHAT_STORAGE_KEY = 'anomaly_chats';
 
-// ФИКС: защищённая загрузка чатов
 function loadChats() {
   var saved = localStorage.getItem(CHAT_STORAGE_KEY);
   chatHistory = [];
@@ -532,11 +534,7 @@ function loadChats() {
     } catch(e) { chatHistory = []; }
   }
   if (chatHistory.length === 0) {
-    var newChat = {
-      id: 'chat_' + Date.now(),
-      name: 'Chat 1',
-      messages: []
-    };
+    var newChat = { id: 'chat_' + Date.now(), name: 'Chat 1', messages: [] };
     chatHistory = [newChat];
     currentChatId = newChat.id;
     saveChats();
@@ -547,12 +545,9 @@ function loadChats() {
 }
 
 function saveChats() {
-  try {
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatHistory));
-  } catch(e) {}
+  try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatHistory)); } catch(e) {}
 }
 
-// ФИКС: защищённое создание чата
 function createNewChat(silent) {
   if (!Array.isArray(chatHistory)) chatHistory = [];
   var newChat = {
@@ -573,7 +568,6 @@ function switchChat(id) {
   renderChatMessages();
 }
 
-// ФИКС: защищённое удаление чата
 function deleteChat(id, event) {
   if (event) event.stopPropagation();
   if (confirm('Удалить этот чат?')) {
@@ -589,7 +583,6 @@ function deleteChat(id, event) {
   }
 }
 
-// ФИКС: защищённый рендер списка
 function renderChatList() {
   var listEl = document.getElementById('chatList');
   if (!listEl) return;
@@ -755,7 +748,6 @@ function loadData() {
     treeData.children.push({ name: "Games", isFolder: true, isGames: true, children: [], x: 30, y: 150 });
   }
 
-  // ФИКС: авто-восстановление корзины
   var hasTrash = treeData.children.some(function(c) { return c.isTrash; });
   if (!hasTrash) {
     treeData.children.push({ name: "_TRASH", isFolder: true, isTrash: true, children: [], x: 30, y: 300 });
@@ -1495,11 +1487,10 @@ function openFile(fileNode) {
     footerNav.innerHTML = '<button type="button" id="closeEditorFooter">[ ВЫЙТИ ]</button>';
     document.getElementById('closeEditorFooter').onclick = function() { document.getElementById('closeEditorBtn').click(); };
     content.contentEditable = 'false';
-    
-    // ФИКС: гарантированно показываем список чатов и заполняем его
+
     var clc = document.getElementById('chatListContainer');
     if (clc) clc.classList.add('active');
-    
+
     if (window.innerWidth <= 768) {
       content.style.left = '0';
       document.getElementById('closeChatListBtn').style.display = 'block';
